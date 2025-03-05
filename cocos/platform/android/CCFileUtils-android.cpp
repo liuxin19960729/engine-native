@@ -243,6 +243,7 @@ bool FileUtilsAndroid::isDirectoryExistInternal(const std::string& dirPath_) con
     return false;
 }
 
+/**andriod 中  /  or  @assets 开头的才是绝对路径 */
 bool FileUtilsAndroid::isAbsolutePath(const std::string& strPath) const
 {
     // On Android, there are two situations for full path.

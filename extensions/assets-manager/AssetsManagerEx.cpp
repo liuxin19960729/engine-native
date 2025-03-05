@@ -1032,10 +1032,10 @@ void AssetsManagerEx::checkUpdate()
     switch (_updateState) {
         case State::FAIL_TO_UPDATE:
             _updateState = State::UNCHECKED;
-        case State::UNCHECKED:
+        case State::UNCHECKED://未检测
         case State::PREDOWNLOAD_VERSION:
         {
-            downloadVersion();
+            downloadVersion();// 下载版本文件
         }
             break;
         case State::UP_TO_DATE:

@@ -620,6 +620,8 @@ void FileUtils::purgeCachedEntries()
     _fullPathCache.clear();
 }
 
+
+/**从文件获取字符串 */
 std::string FileUtils::getStringFromFile(const std::string& filename)
 {
     std::string s;
@@ -778,8 +780,8 @@ std::string FileUtils::fullPathForFilename(const std::string &filename) const
     {
         return "";
     }
-
-    if (isAbsolutePath(filename))
+   
+    if (isAbsolutePath(filename))  /**绝对路径 */
     {
         return normalizePath(filename);
     }
@@ -796,6 +798,7 @@ std::string FileUtils::fullPathForFilename(const std::string &filename) const
 
     std::string fullpath;
 
+    /**查询path 数字 */
     for (const auto& searchIt : _searchPathArray)
     {
         for (const auto& resolutionIt : _searchResolutionsOrderArray)
@@ -874,6 +877,7 @@ const std::vector<std::string>& FileUtils::getSearchResolutionsOrder() const
     return _searchResolutionsOrderArray;
 }
 
+/**查询数组 */
 const std::vector<std::string>& FileUtils::getSearchPaths() const
 {
     return _searchPathArray;
@@ -889,6 +893,10 @@ void FileUtils::setWritablePath(const std::string& writablePath)
     _writablePath = writablePath;
 }
 
+
+/**
+ * andriod @assest
+ */
 const std::string& FileUtils::getDefaultResourceRootPath() const
 {
     return _defaultResRootPath;
@@ -910,6 +918,7 @@ void FileUtils::setDefaultResourceRootPath(const std::string& path)
     }
 }
 
+/**设置搜索路径 */
 void FileUtils::setSearchPaths(const std::vector<std::string>& searchPaths)
 {
     bool existDefaultRootPath = false;
@@ -972,6 +981,10 @@ void FileUtils::setFilenameLookupDictionary(const ValueMap& filenameLookupDict)
     _filenameLookupDict = filenameLookupDict;
 }
 
+
+/**
+ * js 中  API loadFilenameLookup
+ */
 void FileUtils::loadFilenameLookupDictionaryFromFile(const std::string &filename)
 {
     const std::string fullPath = fullPathForFilename(filename);
@@ -1030,6 +1043,8 @@ bool FileUtils::isAbsolutePath(const std::string& path) const
     return (path[0] == '/');
 }
 
+
+/*检查目录是否存在*/
 bool FileUtils::isDirectoryExist(const std::string& dirPath) const
 {
     CCASSERT(!dirPath.empty(), "Invalid path");
@@ -1207,6 +1222,7 @@ bool FileUtils::removeDirectory(const std::string& path)
     return false;
 }
 
+/**产出文件 */
 bool FileUtils::removeFile(const std::string &path)
 {
     CCASSERT(false, "FileUtils not support removeFile");
@@ -1481,6 +1497,8 @@ std::string FileUtils::getFileDir(const std::string& path) const
     return ret;
 }
 
+
+/**删除  . 和 ..*/
 std::string FileUtils::normalizePath(const std::string& path) const
 {
     std::string ret;
