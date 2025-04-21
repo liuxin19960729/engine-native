@@ -151,6 +151,7 @@ namespace cocos2d { namespace network {
         IDownloadTask *DownloaderAndroid::createCoTask(std::shared_ptr<const DownloadTask>& task)
         {
             DownloadTaskAndroid *coTask = new DownloadTaskAndroid;
+            // 下载任务
             coTask->task = task;
 
             JniMethodInfo methodInfo;

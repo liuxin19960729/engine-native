@@ -85,6 +85,7 @@ namespace cocos2d
                 DLLOG("Destruct DownloadTaskCURL %p", this);
             }
 
+            // 创建 or 获取 文件File对象
             bool init(const string &filename, const string &tempSuffix)
             {
                 if (0 == filename.length())
@@ -129,10 +130,12 @@ namespace cocos2d
                     auto util = FileUtils::getInstance();
                     /**目录在磁盘的绝对地址 */
                     dir = _tempFileName.substr(0, found + 1);
-                    if (false == util->isDirectoryExist(dir))
+
+                    if (false == util->isDirectoryExist(dir)) // 目录不存在创建一个目录
                     {
                         if (false == util->createDirectory(dir))
                         {
+                            // 创建文件 失败 返回  errorCode -2
                             _errCode = DownloadTask::ERROR_FILE_OP_FAILED;
                             _errCodeInternal = 0;
                             _errDescription = "Can't create dir:";
@@ -142,8 +145,16 @@ namespace cocos2d
                     }
 
                     // open file
+
+                    /**
+                     * "ab"
+                     * a 追加写
+                     * b 打开二进制文件
+                     * note: （在 Windows 平台上尤其重要，防止文本模式下的换行转换）。
+                     */
+
                     _fp = fopen(util->getSuitableFOpen(_tempFileName).c_str(), "ab");
-                    if (nullptr == _fp)
+                    if (nullptr == _fp) // 打开文件失败
                     {
                         _errCode = DownloadTask::ERROR_FILE_OP_FAILED;
                         _errCodeInternal = 0;
@@ -158,6 +169,14 @@ namespace cocos2d
 
             void initProc()
             {
+
+                /**
+                 * 在 C++11 及更高标准中，std::lock_guard 是一个非常轻量的 RAII（资源获取即初始化）类模板，用来简化对互斥量（std::mutex）的加锁和解锁操作。
+                 *
+                 * lock() 上锁
+                 * unlock() 释放锁
+                 */
+
                 lock_guard<mutex> lock(_mutex);
                 _initInternal();
             }
@@ -176,10 +195,12 @@ namespace cocos2d
                 size_t ret = 0;
                 if (_fp)
                 {
+                    // 写入数据
                     ret = fwrite(buffer, size, count, _fp);
                 }
                 else
                 {
+                    // 如果文件打开失败 直接先江数据存入到缓冲区里面
                     ret = size * count;
                     auto cap = _buf.capacity();
                     auto bufSize = _buf.size();
@@ -280,6 +301,7 @@ namespace cocos2d
             void run()
             {
                 lock_guard<mutex> lock(_threadMutex);
+                // joinable 线程可否倍join or detach
                 if (false == _thread.joinable())
                 {
                     thread newThread(&DownloaderCURL::Impl::_threadProc, this);
