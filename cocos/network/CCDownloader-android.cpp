@@ -161,7 +161,9 @@ namespace cocos2d { namespace network {
                                                "(" JARG_DOWNLOADER "I" JARG_STR JARG_STR "[" JARG_STR")V"))
             {
                 jclass jclassString = methodInfo.env->FindClass("java/lang/String");
+                /**请求地址 */
                 jstring jstrURL = methodInfo.env->NewStringUTF(task->requestURL.c_str());
+                // 存储位置
                 jstring jstrPath = methodInfo.env->NewStringUTF(task->storagePath.c_str());
                 jobjectArray jarrayHeader = methodInfo.env->NewObjectArray(task->header.size()*2, jclassString, NULL);
                 const std::map<std::string, std::string> &headMap = task->header;

@@ -86,7 +86,7 @@ public class Cocos2dxDownloader {
         });
         runNextTaskIfExists();
     }
-
+    
     public static Cocos2dxDownloader createDownloader(int id, int timeoutInSeconds, String tempFileSuffix, int maxProcessingTasks) {
         Cocos2dxDownloader downloader = new Cocos2dxDownloader();
         downloader._id = id;
