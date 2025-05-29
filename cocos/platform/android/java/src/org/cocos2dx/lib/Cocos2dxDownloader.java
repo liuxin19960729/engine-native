@@ -88,6 +88,12 @@ public class Cocos2dxDownloader {
     }
     
     public static Cocos2dxDownloader createDownloader(int id, int timeoutInSeconds, String tempFileSuffix, int maxProcessingTasks) {
+        /**
+         * id  唯一  cpp sDownloaderCounter++ 下载次数
+         * timeoutInSeconds
+         * tempFileSuffix
+         * maxProcessingTasks
+         */
         Cocos2dxDownloader downloader = new Cocos2dxDownloader();
         downloader._id = id;
 
@@ -145,6 +151,7 @@ public class Cocos2dxDownloader {
                         if (tempFile.isDirectory()) break;
 
                         File parent = tempFile.getParentFile();
+                        // mkdirs 创建此抽象路径名指定的目录，包括创建必需但不存在的父目录。
                         if (!parent.isDirectory() && !parent.mkdirs()) break;
 
                         finalFile = new File(path);
@@ -154,10 +161,12 @@ public class Cocos2dxDownloader {
                         host = domain.startsWith("www.") ? domain.substring(4) : domain;
                         if (fileLen > 0) {
                             if (_resumingSupport.containsKey(host) && _resumingSupport.get(host)) {
+                                //  downloadStart 下载开始的长度 tempFile 已经下载的数据
                                 downloadStart = fileLen;
                             } else {
                                 // Remove previous downloaded context
                                 try {
+                                    // 创建一个临时文件 write  ""
                                     PrintWriter writer = new PrintWriter(tempFile);
                                     writer.print("");
                                     writer.close();
@@ -174,6 +183,7 @@ public class Cocos2dxDownloader {
                         builder.addHeader(header[i * 2], header[(i * 2) + 1]);
                     }
                     if (downloadStart > 0) {
+                        // 告诉服务器我们从哪个字节开始下载
                         builder.addHeader("RANGE", "bytes=" + downloadStart + "-");
                     }
 
@@ -204,10 +214,12 @@ public class Cocos2dxDownloader {
 
                             try {
 
+                                // respose code not in range 200~206 code  不正确
                                 if(!(response.code() >= 200 && response.code() <= 206)) {
-                                    // it is encourage to delete the tmp file when requested range not satisfiable.
+                                    // it is encourage to delete the tmp file when requested range not satisfiable(满足).
                                     if (response.code() == 416) {
                                         File file = new File(path + downloader._tempFileNameSuffix);
+                                        // 删除文件
                                         if (file.exists() && file.isFile()) {
                                             file.delete();
                                         }
@@ -224,11 +236,15 @@ public class Cocos2dxDownloader {
                                         _resumingSupport.put(host, false);
                                     }
                                 }
-
+                                // 从多少字节开始多去
                                 long current = downloadStart;
+                                // 网络输入流
                                 is = response.body().byteStream();
-
+                                /**
+                                 * path.length >0 需要下载文件并且将文件存入磁盘
+                                 */
                                 if (path.length() > 0) {
+                                    /**FileOutputStream File append(追加)  */
                                     if (downloadStart > 0) {
                                         fos = new FileOutputStream(tempFile, true);
                                     } else {
@@ -239,9 +255,10 @@ public class Cocos2dxDownloader {
                                     while ((len = is.read(buf)) != -1) {
                                         current += len;
                                         fos.write(buf, 0, len);
+                                        // current已经写入的字节长度
                                         downloader.onProgress(id, len, current, total);
                                     }
-                                    fos.flush();
+                                    fos.flush();// 刷入磁盘
 
                                     String errStr = null;
                                     do {
@@ -255,22 +272,26 @@ public class Cocos2dxDownloader {
                                                 break;
                                             }
                                         }
+                                        // 删除 finalFile   改名 finalFile
                                         tempFile.renameTo(finalFile);
                                     } while (false);
 
                                     if (errStr == null) {
+                                        /**没有错误 文件下载成功  执行下一个Task */
                                         downloader.onFinish(id, 0, null, null);
                                         downloader.runNextTaskIfExists();
                                     }
                                     else
                                         downloader.onFinish(id, 0, errStr, null);
                                 } else {
-                                    // 非文件
+                                    /**
+                                     * ByteArrayOutputStream 缓冲去的输入流
+                                     */
                                     ByteArrayOutputStream buffer;
                                     if(total > 0) {
                                         buffer = new ByteArrayOutputStream((int) total);
                                     } else {
-                                        buffer = new ByteArrayOutputStream(4096);
+                                        buffer = new ByteArrayOutputStream(4096);//4K(可能是为了分配一个PAGE 大小提高效率)
                                     }
 
                                     int len;

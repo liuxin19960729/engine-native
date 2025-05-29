@@ -64,7 +64,7 @@ FileUtils* FileUtils::getInstance()
     if (s_sharedFileUtils == nullptr)
     {
         s_sharedFileUtils = new FileUtilsAndroid();
-        if (!s_sharedFileUtils->init())
+        if (!s_sharedFileUtils->init()) // 初始化不成功 释放对象内存
         {
           delete s_sharedFileUtils;
           s_sharedFileUtils = nullptr;

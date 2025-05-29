@@ -85,6 +85,21 @@ namespace cocos2d { namespace network {
             }
         };
 
+        // Task Finish lambda
+        /**
+         * [&] 捕获引用所有变量
+         * [=] 捕获所有变量的值
+         * this 在[] 中出现不能超过一次
+         *  
+         * [=] = 默认捕获 [] 里面不因该有任何 =identifier
+         * [&] = 默认捕获 [] 里面不应该有任何 &identifier
+         * 
+         *  [=, *this] 这里的都this 是引用
+         * 
+         * [=， this] — 仅自 C++20 起有效。C++20 弃用了通过 [=] 隐式捕获 this，并允许与 [=] 一起显式捕获 this。
+         *      [=, this] note: c++20 以前 = 默认捕获 this  
+         * 
+         */
         _impl->onTaskFinish = [this](const DownloadTask& task,
                                      int errorCode,
                                      int errorCodeInternal,

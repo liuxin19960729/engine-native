@@ -98,6 +98,7 @@ namespace cocos2d { namespace network {
         {
             DLLOG("Construct DownloaderAndroid: %p", this);
             JniMethodInfo methodInfo;
+            // java Cocos2dxDownloader.createDownloader 调用
             if (JniHelper::getStaticMethodInfo(methodInfo,
                                                JCLS_DOWNLOADER,
                                                "createDownloader",
@@ -112,6 +113,7 @@ namespace cocos2d { namespace network {
                         jStr,
                         hints.countOfMaxProcessingTasks
                 );
+                // 获取实现对象
                 _impl = methodInfo.env->NewGlobalRef(jObj);
                 DLLOG("android downloader: jObj: %p, _impl: %p", jObj, _impl);
                 //It's not thread-safe here, use thread-safe method instead
@@ -284,6 +286,10 @@ JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnProgress)(JNIEnv *env, jclass claz
 
 JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnFinish)(JNIEnv *env, jclass clazz, jint id, jint taskId, jint errCode, jstring errStr, jbyteArray data)
 {
+    /**
+     * taskId
+     * errCode
+     */
     if(getApplicationExited())
     {
         return;
@@ -297,7 +303,7 @@ JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnFinish)(JNIEnv *env, jclass clazz,
         return;
     }
     std::vector<unsigned char> buf;
-    if (errStr)
+    if (errStr) // 下载错误
     {
         // failure
         const char *nativeErrStr = env->GetStringUTFChars(errStr, JNI_FALSE);

@@ -153,6 +153,7 @@ public class Cocos2dxWebView extends WebView {
         public void onReceivedError(WebView view, int errorCode, String description, final String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             Cocos2dxActivity activity = (Cocos2dxActivity)getContext();
+            // java -> js 一定要在GL 线程执行
             activity.runOnGLThread(new Runnable() {
                 @Override
                 public void run() {
