@@ -648,7 +648,7 @@ FileUtils::Status FileUtils::getContents(const std::string &filename, ResizableB
     if (fullPath.empty())
         return Status::NotExists;
 
-    // fopen 
+    // fopen
     FILE *fp = fopen(fs->getSuitableFOpen(fullPath).c_str(), "rb");
     if (!fp)
         return Status::OpenFailed;
@@ -778,6 +778,7 @@ std::string FileUtils::getPathForFilename(const std::string &filename, const std
     return path;
 }
 
+/**根据filename获取全路径名 */
 std::string FileUtils::fullPathForFilename(const std::string &filename) const
 {
     if (filename.empty())
@@ -785,7 +786,7 @@ std::string FileUtils::fullPathForFilename(const std::string &filename) const
         return "";
     }
 
-    /**绝对路径 */
+    // 已经是绝对路径 对路径做兼容性处理
     if (isAbsolutePath(filename))
     {
         return normalizePath(filename);
@@ -803,7 +804,9 @@ std::string FileUtils::fullPathForFilename(const std::string &filename) const
 
     std::string fullpath;
 
-    /**查询path 数字 */
+    /**
+     * 通过目录顺序查找文件 如果查到立即返回
+     */
     for (const auto &searchIt : _searchPathArray)
     {
         for (const auto &resolutionIt : _searchResolutionsOrderArray)
@@ -910,6 +913,7 @@ const std::string &FileUtils::getDefaultResourceRootPath() const
     return _defaultResRootPath;
 }
 
+/**设置默认资源根路径 */
 void FileUtils::setDefaultResourceRootPath(const std::string &path)
 {
     if (_defaultResRootPath != path)

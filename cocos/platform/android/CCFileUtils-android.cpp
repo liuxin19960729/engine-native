@@ -152,6 +152,7 @@ std::string FileUtilsAndroid::getNewFilename(const std::string &filename) const
     return newFileName;
 }
 
+/**文件是否存在 */
 bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
 {
     if (strFilePath.empty())
@@ -196,6 +197,7 @@ bool FileUtilsAndroid::isFileExistInternal(const std::string& strFilePath) const
     return bFound;
 }
 
+/**该目录是否存在,note: 如果是apk assest 中的目录啧需要是一个目录并且目录里面存在文件 */
 bool FileUtilsAndroid::isDirectoryExistInternal(const std::string& dirPath_) const
 {
     if (dirPath_.empty())
@@ -204,34 +206,39 @@ bool FileUtilsAndroid::isDirectoryExistInternal(const std::string& dirPath_) con
     }
 
     std::string dirPath = dirPath_;
-    if (dirPath[dirPath.length() - 1] == '/')
+    if (dirPath[dirPath.length() - 1] == '/') // a/b/c/ 删除 /  to  a/b/c
     {
         dirPath[dirPath.length() - 1] = '\0';
     }
 
     // find absolute path in flash memory
+    // OS 路径
     if (dirPath[0] == '/')
     {
         CCLOG("find in flash memory dirPath(%s)", dirPath.c_str());
         struct stat st;
         if (stat(dirPath.c_str(), &st) == 0)
         {
-            return S_ISDIR(st.st_mode);
+            return S_ISDIR(st.st_mode);// S_ISDIR 是否是文件夹
         }
     }
     else
     {
+        // APK 路径
         // find it in apk's assets dir
         // Found "@assets/" at the beginning of the path and we don't want it
         CCLOG("find in apk dirPath(%s)", dirPath.c_str());
         const char* s = dirPath.c_str();
         if (dirPath.find(_defaultResRootPath) == 0)
-        {
+        {   
+            //跳过 _defaultResRootPath char *s 指针
             s += _defaultResRootPath.length();
         }
         if (FileUtilsAndroid::assetmanager)
         {
+            /**打开 asset 层次结构中的 s 目录 */
             AAssetDir* aa = AAssetManager_openDir(FileUtilsAndroid::assetmanager, s);
+            /**目录 并且目录里面有文件 */
             if (aa && AAssetDir_getNextFileName(aa))
             {
                 AAssetDir_close(aa);
@@ -262,6 +269,8 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
     if (filename.empty())
         return FileUtils::Status::NotExists;
 
+
+    /**fullPathForFilename  会根据搜索路径搜索路径里面是否存在该文件 note: hotUpdate*/
     std::string fullPath = fullPathForFilename(filename);
     if (fullPath.empty())
         return FileUtils::Status::NotExists;
@@ -299,10 +308,14 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
         return FileUtils::Status::OpenFailed;
     }
 
+    //asset 数据大小
     auto size = AAsset_getLength(asset);
+    // 重置缓冲区大小
     buffer->resize(size);
 
+    // 尝试从当前偏移量中读取 size 大小的数据 
     int readsize = AAsset_read(asset, buffer->buffer(), size);
+    //释放资源
     AAsset_close(asset);
 
     if (readsize < size) {
