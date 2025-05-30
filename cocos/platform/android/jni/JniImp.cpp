@@ -92,7 +92,7 @@ namespace
 {	
     bool __isOpenDebugView = false;
     bool __isGLOptModeEnabled = true;
-    std::string g_apkPath;
+    std::string g_apkPath;//apk full path
     EditTextCallback s_editTextCallback = nullptr;
     void* s_ctx = nullptr;
     int g_deviceSampleRate = 44100;
@@ -459,11 +459,13 @@ extern "C"
      * Cocos2dxHelper native functions implementation.
      ***********************************************************/
 
+     /**APK FULL PATH */
     JNIEXPORT void JNICALL JNI_HELPER(nativeSetApkPath)(JNIEnv* env, jobject thiz, jstring apkPath)
     {
         g_apkPath = JniHelper::jstring2string(apkPath);
     }
 
+    /**资源管理和Context 设置 */
     JNIEXPORT void JNICALL JNI_HELPER(nativeSetContext)(JNIEnv*  env, jobject thiz, jobject context, jobject assetManager)
     {
         JniHelper::setClassLoaderFrom(context);

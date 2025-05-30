@@ -171,18 +171,20 @@ public class Cocos2dxHelper {
 
     private static boolean sInited = false;
     public static void init(final Activity activity) {
+        // Cocos2dxActivity 上下文
         sActivity = activity;
         Cocos2dxHelper.sCocos2dxHelperListener = (Cocos2dxHelperListener)activity;
         if (!sInited) {
-
+            /**getPackageManager 包管理器 用于检索安装包信息  */
             PackageManager pm = activity.getPackageManager();
+            /** 是否支持声音输入输出言辞敏感音频应用 */
             boolean isSupportLowLatency = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
 
             Log.d(TAG, "isSupportLowLatency:" + isSupportLowLatency);
 
             int sampleRate = 44100;
             int bufferSizeInFrames = 192;
-
+            
             if (Build.VERSION.SDK_INT >= 17) {
                 AudioManager am = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
                 // use reflection to remove dependence of API 17 when compiling
@@ -209,13 +211,17 @@ public class Cocos2dxHelper {
             final ApplicationInfo applicationInfo = activity.getApplicationInfo();
             
             Cocos2dxHelper.sPackageName = applicationInfo.packageName;
+            /**getFilesDir 应用在该路径下读写不需要额外权限 */
             Cocos2dxHelper.sFileDirectory = activity.getFilesDir().getAbsolutePath();
-            
+            /**设置Apk 在手机存储的路径 */
             Cocos2dxHelper.nativeSetApkPath(Cocos2dxHelper.getAssetsPath());
-    
+            /**重力感觉 */
             Cocos2dxHelper.sCocos2dxAccelerometer = new Cocos2dxAccelerometer(activity);
+            /**AssetManager */
             Cocos2dxHelper.sAssetManager = activity.getAssets();
+            /**Context 和 sAssetManager 的设置*/
             Cocos2dxHelper.nativeSetContext((Context)activity, Cocos2dxHelper.sAssetManager);
+
             Cocos2dxHelper.sVibrateService = (Vibrator)activity.getSystemService(Context.VIBRATOR_SERVICE);
 
             sInited = true;
@@ -250,6 +256,7 @@ public class Cocos2dxHelper {
             if (obbFile.exists())
                 Cocos2dxHelper.sAssetsPath = pathToOBB;
             else
+                // getApplicationInfo().sourceDir apk full path
                 Cocos2dxHelper.sAssetsPath = Cocos2dxHelper.sActivity.getApplicationInfo().sourceDir;
         }
         

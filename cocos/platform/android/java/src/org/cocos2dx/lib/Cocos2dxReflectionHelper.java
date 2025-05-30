@@ -35,8 +35,8 @@ import java.lang.reflect.Proxy;
 public class Cocos2dxReflectionHelper {
     public static <T> T getConstantValue(final Class aClass, final String constantName) {
         try {
-            return (T)aClass.getDeclaredField(constantName).get(null);
-        } catch (NoSuchFieldException e) {
+            return (T)aClass.getDeclaredField(constantName).get(null);//get(obj)要从中提取表示字段值的对象
+         } catch (NoSuchFieldException e) {
             Log.e("error", "can not find " + constantName + " in " + aClass.getName());
         }
         catch (IllegalAccessException e) {

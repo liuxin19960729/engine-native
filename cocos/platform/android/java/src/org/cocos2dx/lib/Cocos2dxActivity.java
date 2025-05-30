@@ -364,7 +364,6 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         sContext = this;
         this.mHandler = new Cocos2dxHandler(this);
-        
         Cocos2dxHelper.init(this);
         CanvasRenderingContext2DImpl.init(this);
         
