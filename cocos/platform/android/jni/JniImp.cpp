@@ -469,6 +469,10 @@ extern "C"
     JNIEXPORT void JNICALL JNI_HELPER(nativeSetContext)(JNIEnv*  env, jobject thiz, jobject context, jobject assetManager)
     {
         JniHelper::setClassLoaderFrom(context);
+        /**
+         * assetManager  Java 包装的native  资源管理器包装
+         * AAssetManager_fromJava 获取Java包装native 底层AssestManager 的指针
+         */
         FileUtilsAndroid::setassetmanager(AAssetManager_fromJava(env, assetManager));
     }
 

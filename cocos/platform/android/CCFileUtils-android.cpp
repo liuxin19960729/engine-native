@@ -266,11 +266,14 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
     if (fullPath.empty())
         return FileUtils::Status::NotExists;
 
+    // 绝对路径
     if (fullPath[0] == '/')
         return FileUtils::getContents(fullPath, buffer);
 
+    // 相对路径
     std::string relativePath;
     size_t position = fullPath.find(ASSETS_FOLDER_NAME);
+    // 是不是在apk 
     if (0 == position) {
         // "@assets/" is at the beginning of the path and we don't want it
         relativePath += fullPath.substr(strlen(ASSETS_FOLDER_NAME));
@@ -278,8 +281,9 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
         relativePath = fullPath;
     }
 
+    // 从obb 里面获取数据
     if (obbfile)
-    {
+    {  
         if (obbfile->getFileData(relativePath, buffer))
             return FileUtils::Status::OK;
     }
@@ -310,7 +314,7 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
     return FileUtils::Status::OK;
 }
 
-/**可写文件目录地址 */
+/**应用可写文件路径 apk 读取该路径读写不需要权限 */
 std::string FileUtilsAndroid::getWritablePath() const
 {
     // Fix for Nexus 10 (Android 4.2 multi-user environment)
