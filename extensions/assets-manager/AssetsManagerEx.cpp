@@ -1037,7 +1037,8 @@ void AssetsManagerEx::checkUpdate()
         case State::UNCHECKED://未检测
         case State::PREDOWNLOAD_VERSION:
         {
-            downloadVersion();// 下载版本文件
+            //下载版本文件 note: version Url 不存在下载Manifest file
+            downloadVersion();
         }
             break;
         case State::UP_TO_DATE:
@@ -1327,7 +1328,7 @@ void AssetsManagerEx::onSuccess(const std::string &/*srcUrl*/, const std::string
                 ok = _verifyCallback(storagePath, asset);
             }
         }
-
+        
         if (ok)
         {
             bool compressed = assetIt != assets.end() ? assetIt->second.compressed : false;
