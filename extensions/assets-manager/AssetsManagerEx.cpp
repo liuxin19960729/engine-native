@@ -230,8 +230,10 @@ void AssetsManagerEx::prepareLocalManifest()
     _localManifest->prependSearchPaths();
 }
 
+/**加载本地manifest */
 bool AssetsManagerEx::loadLocalManifest(Manifest* localManifest, const std::string& storagePath)
 {
+    // 状态不正确
     if (_updateState > State::UNINITED)
     {
         return false;

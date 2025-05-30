@@ -54,7 +54,7 @@ public:
     //! Update states
     enum class State
     {
-        UNINITED,
+        UNINITED,// 未初始化状态
         UNCHECKED,
         PREDOWNLOAD_VERSION,
         DOWNLOADING_VERSION,

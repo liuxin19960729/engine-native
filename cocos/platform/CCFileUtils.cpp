@@ -571,6 +571,7 @@ FileUtils::~FileUtils()
 {
 }
 
+/**向文件里面写入字符串数据 */
 bool FileUtils::writeStringToFile(const std::string &dataStr, const std::string &fullPath)
 {
     Data data;
@@ -620,7 +621,7 @@ void FileUtils::purgeCachedEntries()
     _fullPathCache.clear();
 }
 
-/**从文件获取字符串 */
+/**读取文件里面的字符串内容*/
 std::string FileUtils::getStringFromFile(const std::string &filename)
 {
     std::string s;
@@ -1039,6 +1040,7 @@ std::string FileUtils::getFullPathForDirectoryAndFilename(const std::string &dir
     return ret;
 }
 
+/**文件是否存在 apk or 通过收索路径来检查该文件是否存在 */
 bool FileUtils::isFileExist(const std::string &filename) const
 {
     if (isAbsolutePath(filename))

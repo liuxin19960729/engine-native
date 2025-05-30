@@ -89,6 +89,10 @@ Manifest::Manifest(const std::string& manifestUrl/* = ""*/)
         parseFile(manifestUrl);
 }
 
+/**
+ * content 内容字符串
+ * manifestRoot 存储路径
+ */
 Manifest::Manifest(const std::string& content, const std::string& manifestRoot)
 : _versionLoaded(false)
 , _loaded(false)
