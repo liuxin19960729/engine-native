@@ -401,14 +401,14 @@ namespace se {
     private:
         explicit Value(Type type);
         void reset(Type type);
-
+        /**num string boolean  内部直接存储 Object 对Js 对象的弱引用  */
         union {
             bool _boolean;
             double _number;
             std::string* _string;
             Object* _object;
         } _u;
-
+        /** null undefined 无值类型由type 直接表示 */
         Type _type;
         bool _autoRootUnroot;
     };
