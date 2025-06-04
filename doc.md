@@ -134,3 +134,20 @@ const se::ValueArray& args = s.args();
 s.rval().setInt32(100);
 
 ```
+## 手动绑定
+### 回调函数声明
+```cpp
+// 函数绑定
+SE_BIND_FUNC(xxxx)
+```
+### 为 JS 对象设置一个属性值
+```cpp
+se::Object* globalObj = se::ScriptEngine::getInstance()->getGlobalObject(); // 这里为了演示方便，获取全局对象
+globalObj->setProperty("foo", se::Value(100)); // 给全局对象设置一个 foo 属性，值为 100
+
+
+
+js 获取CPP 设置的值
+cc.log("foo value: " + foo); // 打印出 foo value: 100
+
+```
