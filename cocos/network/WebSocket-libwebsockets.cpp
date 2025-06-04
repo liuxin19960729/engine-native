@@ -374,7 +374,7 @@ protected:
 
 public:
     std::list<WsMessage *> *_subThreadWsMessageQueue;
-    std::mutex _subThreadWsMessageQueueMutex;
+    std::mutex _subThreadWsMessageQueueMutex;// lock 互斥
     std::thread *_subThreadInstance;
 
 private:
@@ -1080,6 +1080,9 @@ int WebSocketImpl::onClientWritable()
 
     do
     {
+        // std::lock_guard<std::mutex>
+        // 构造一个 lk 对象 并且锁定 
+        // 函数执行完 or {} 结束 调用析构函数解绑
         std::lock_guard<std::mutex> lk(__wsHelper->_subThreadWsMessageQueueMutex);
 
         if (__wsHelper->_subThreadWsMessageQueue->empty())
@@ -1483,6 +1486,11 @@ void WebSocket::closeAllConnections()
 
 WebSocket::WebSocket()
 {
+    /**
+     * std::nothrow 告诉编译器声明的函数和调用函数从不发生异常
+     * 
+     */
+    
     _impl = new (std::nothrow) WebSocketImpl(this);
 }
 
