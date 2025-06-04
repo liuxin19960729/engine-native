@@ -423,7 +423,7 @@ static bool WebSocket_send(se::State& s)
                 ok = dataObj->getArrayBufferData(&ptr, &length);
                 SE_PRECONDITION2(ok, false, "getArrayBufferData failed!");
             }
-            else if (dataObj->isTypedArray())
+            else if (dataObj->isTypedArray())// uint8Array
             {
                 ok = dataObj->getTypedArrayData(&ptr, &length);
                 SE_PRECONDITION2(ok, false, "getTypedArrayData failed!");
