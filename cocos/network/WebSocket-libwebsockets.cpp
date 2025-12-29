@@ -426,6 +426,7 @@ void WsThreadHelper::quitWebSocketThread()
     _needQuit = true;
 }
 
+// 进入服务循环
 void WsThreadHelper::onSubThreadLoop()
 {
     if (__wsContext)
@@ -1069,6 +1070,7 @@ void WebSocketImpl::onClientOpenConnectionRequest()
     }
 }
 
+/**可以发送状态 */
 int WebSocketImpl::onClientWritable()
 {
 //    LOGD("onClientWritable ... \n");
@@ -1431,7 +1433,7 @@ int WebSocketImpl::onSocketCallback(struct lws *wsi, enum lws_callback_reasons r
     int ret = 0;
     switch (reason)
     {
-        case LWS_CALLBACK_CLIENT_ESTABLISHED:
+        case LWS_CALLBACK_CLIENT_ESTABLISHED:// 链接建立
             ret = onConnectionOpened();
             break;
 
@@ -1443,7 +1445,7 @@ int WebSocketImpl::onSocketCallback(struct lws *wsi, enum lws_callback_reasons r
             ret = onConnectionClosed();
             break;
 
-        case LWS_CALLBACK_CLIENT_RECEIVE:
+        case LWS_CALLBACK_CLIENT_RECEIVE:// 数据接收到了
             ret = onClientReceivedData(in, len);
             break;
 
