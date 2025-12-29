@@ -345,11 +345,11 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         super.onCreate(savedInstanceState);
 
         // Workaround in https://stackoverflow.com/questions/16283079/re-launch-of-activity-on-home-button-but-only-the-first-time/16447508
-        if (!isTaskRoot()) {
+        if (!isTaskRoot()) {// i是否是第一个页面
             // Android launched another instance of the root activity into an existing task
             //  so just quietly finish and go away, dropping the user back into the activity
             //  at the top of the stack (ie: the last state of this task)
-            finish();
+            finish();// 关闭页面
             Log.w(TAG, "[Workaround] Ignore the activity started from icon!");
             return;
         }
