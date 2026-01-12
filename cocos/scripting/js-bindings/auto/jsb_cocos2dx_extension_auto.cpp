@@ -625,11 +625,14 @@ static bool js_extension_AssetsManagerEx_getDownloadedFiles(se::State& s)
 }
 SE_BIND_FUNC(js_extension_AssetsManagerEx_getDownloadedFiles)
 
+/**事件 */
 static bool js_extension_AssetsManagerEx_setEventCallback(se::State& s)
 {
     cocos2d::extension::AssetsManagerEx* cobj = (cocos2d::extension::AssetsManagerEx*)s.nativeThisObject();
     SE_PRECONDITION2(cobj, false, "js_extension_AssetsManagerEx_setEventCallback : Invalid Native Object");
+    // 参数
     const auto& args = s.args();
+    // 参数个数
     size_t argc = args.size();
     CC_UNUSED bool ok = true;
     if (argc == 1) {
@@ -637,6 +640,13 @@ static bool js_extension_AssetsManagerEx_setEventCallback(se::State& s)
         do {
             if (args[0].isObject() && args[0].toObject()->isFunction())
             {
+               /**
+                * se::Value js 变量在C++层的引用
+                * 
+                * thisObject 当前函数调用的JS对象
+                * 
+                */
+               
                 se::Value jsThis(s.thisObject());
                 se::Value jsFunc(args[0]);
                 jsThis.toObject()->attachObject(jsFunc.toObject());
@@ -706,6 +716,9 @@ static bool js_extension_AssetsManagerEx_getTotalFiles(se::State& s)
 }
 SE_BIND_FUNC(js_extension_AssetsManagerEx_getTotalFiles)
 
+/**
+ * 检查更新
+ */
 static bool js_extension_AssetsManagerEx_checkUpdate(se::State& s)
 {
     cocos2d::extension::AssetsManagerEx* cobj = (cocos2d::extension::AssetsManagerEx*)s.nativeThisObject();
@@ -884,6 +897,12 @@ static bool js_extension_AssetsManagerEx_getMaxConcurrentTask(se::State& s)
 }
 SE_BIND_FUNC(js_extension_AssetsManagerEx_getMaxConcurrentTask)
 
+/**
+ * 设置版本对比函数
+ *  >0 A>b
+ *  =0 A=B
+ *  <0 A<B
+ */
 static bool js_extension_AssetsManagerEx_setVersionCompareHandle(se::State& s)
 {
     cocos2d::extension::AssetsManagerEx* cobj = (cocos2d::extension::AssetsManagerEx*)s.nativeThisObject();
@@ -955,6 +974,7 @@ static bool js_extension_AssetsManagerEx_getTotalBytes(se::State& s)
 }
 SE_BIND_FUNC(js_extension_AssetsManagerEx_getTotalBytes)
 
+/**设置验证回调 验证文件的完整性 */
 static bool js_extension_AssetsManagerEx_setVerifyCallback(se::State& s)
 {
     cocos2d::extension::AssetsManagerEx* cobj = (cocos2d::extension::AssetsManagerEx*)s.nativeThisObject();
@@ -1026,6 +1046,7 @@ static bool js_extension_AssetsManagerEx_getStoragePath(se::State& s)
 }
 SE_BIND_FUNC(js_extension_AssetsManagerEx_getStoragePath)
 
+/**开始更新 */
 static bool js_extension_AssetsManagerEx_update(se::State& s)
 {
     cocos2d::extension::AssetsManagerEx* cobj = (cocos2d::extension::AssetsManagerEx*)s.nativeThisObject();
