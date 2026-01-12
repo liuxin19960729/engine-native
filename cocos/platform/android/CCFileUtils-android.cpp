@@ -287,17 +287,23 @@ FileUtils::Status FileUtilsAndroid::getContents(const std::string& filename, Res
         LOGD("... FileUtilsAndroid::assetmanager is nullptr");
         return FileUtils::Status::NotInitialized;
     }
-
+    /**
+     * AAssetManager_open NDK 函数 读取
+     * relativePath 相对于包 assets目录 
+     * 
+     */
     AAsset* asset = AAssetManager_open(assetmanager, relativePath.data(), AASSET_MODE_UNKNOWN);
     if (nullptr == asset) {
         LOGD("asset (%s) is nullptr", filename.c_str());
         return FileUtils::Status::OpenFailed;
     }
 
+    // 文件大小
     auto size = AAsset_getLength(asset);
     buffer->resize(size);
-
+    // 读取内容到buf
     int readsize = AAsset_read(asset, buffer->buffer(), size);
+    // 关闭文件释放资源
     AAsset_close(asset);
 
     if (readsize < size) {

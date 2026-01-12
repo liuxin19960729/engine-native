@@ -948,6 +948,7 @@ bool jsb_global_load_image(const std::string& path, const se::Value& callbackVal
         });
     };
 
+    //http or https下载     
     size_t pos = std::string::npos;
     if (path.find("http://") == 0 || path.find("https://") == 0)
     {
@@ -985,6 +986,7 @@ bool jsb_global_load_image(const std::string& path, const se::Value& callbackVal
     return true;
 }
 
+/**加载图片 */
 static bool js_loadImage(se::State& s)
 {
     const auto& args = s.args();

@@ -360,6 +360,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         Cocos2dxHelper.registerBatteryLevelReceiver(this);
 
+        // 加载动态连接库
         onLoadNativeLibraries();
 
         sContext = this;

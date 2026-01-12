@@ -173,7 +173,10 @@ public class Cocos2dxHelper {
         sActivity = activity;
         Cocos2dxHelper.sCocos2dxHelperListener = (Cocos2dxHelperListener)activity;
         if (!sInited) {
-
+            /**
+             * PackageManager 管理应用程序包的核心服务
+             * 
+             */
             PackageManager pm = activity.getPackageManager();
             boolean isSupportLowLatency = pm.hasSystemFeature(PackageManager.FEATURE_AUDIO_LOW_LATENCY);
 
