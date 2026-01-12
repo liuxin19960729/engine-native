@@ -144,7 +144,9 @@ extern "C"
             g_SDKInt = env->GetStaticIntField(versionClass, sdkIntFieldID);
         }
     }
-
+    /**
+     * 本地库加载 例如:System.loadLibrary() 虚拟机会调用 JNI_OnLoad
+     */
     JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
     {
         JniHelper::setJavaVM(vm);

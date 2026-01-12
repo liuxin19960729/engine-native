@@ -994,6 +994,10 @@ static bool js_loadImage(se::State& s)
     CC_UNUSED bool ok = true;
     if (argc == 2) {
         std::string path;
+        /**
+         * se::Value 转换为 C++ 类型
+         * 转化未string 类型
+         */
         ok &= seval_to_std_string(args[0], &path);
         SE_PRECONDITION2(ok, false, "js_loadImage : Error processing arguments");
 

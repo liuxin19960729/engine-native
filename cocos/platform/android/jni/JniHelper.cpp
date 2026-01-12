@@ -83,7 +83,7 @@ namespace cocos2d {
         pthread_t thisthread = pthread_self();
         LOGD("JniHelper::setJavaVM(%p), pthread_self() = %ld", javaVM, thisthread);
         _psJavaVM = javaVM;
-
+        // Thread Local
         pthread_key_create(&g_key, _detachCurrentThread);
     }
 

@@ -605,6 +605,7 @@ bool register_all_websocket(se::Object* obj)
     cls->defineProperty("OPEN", _SE(Websocket_OPEN), nullptr);
     cls->defineProperty("CLOSED", _SE(Websocket_CLOSED), nullptr);
 
+    // 注册到js 虚拟机里面去
     cls->install();
 
     se::Value tmp;
@@ -613,7 +614,7 @@ bool register_all_websocket(se::Object* obj)
     tmp.toObject()->defineProperty("CLOSING", _SE(Websocket_CLOSING), nullptr);
     tmp.toObject()->defineProperty("OPEN", _SE(Websocket_OPEN), nullptr);
     tmp.toObject()->defineProperty("CLOSED", _SE(Websocket_CLOSED), nullptr);
-
+    // 注册到JSB 系统中去
     JSBClassType::registerClass<WebSocket>(cls);
 
     __jsb_WebSocket_class = cls;
