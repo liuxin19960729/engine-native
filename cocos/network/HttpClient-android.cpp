@@ -728,7 +728,7 @@ void HttpClient::processResponse(HttpResponse* response, char* responseMessage)
         default:
             break;
     }
-
+    // 连接失败
     int suc = urlConnection.connect();
     if (0 != suc)
     {
