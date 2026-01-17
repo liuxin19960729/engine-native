@@ -494,7 +494,7 @@ void XMLHttpRequest::onResponse(HttpClient* client, HttpResponse* response)
     }
 
     _status = statusCode;
-
+    // 状态修改 触发  onreadystatechange 回调函数执行
     setReadyState(ReadyState::DONE);
 
     if (onload != nullptr)
