@@ -189,6 +189,14 @@ bool AudioEngine::lazyInit()
 {
     if (_audioEngineImpl == nullptr)
     {
+
+        /**
+         * std::nothrow 使用方式 
+         * 内存分配置失败不要抛出异常 直接将 _audioEngineImpl 值赋值未nullptr
+         * 
+         * 如果没有  std::nothrow 则会抛出 std::bad_alloc 异常
+         */
+
         _audioEngineImpl = new (std::nothrow) AudioEngineImpl();
         if(!_audioEngineImpl ||  !_audioEngineImpl->init() ){
             delete _audioEngineImpl;
