@@ -594,6 +594,7 @@ bool AssetsManagerEx::decompress(const std::string &zip)
     return true;
 }
 
+/**压缩文件解压 */
 void AssetsManagerEx::decompressDownloadedZip(const std::string &customId, const std::string &storagePath)
 {
     struct AsyncData
@@ -1326,6 +1327,7 @@ void AssetsManagerEx::onSuccess(const std::string & /*srcUrl*/, const std::strin
         if (assetIt != assets.end())
         {
             Manifest::Asset asset = assetIt->second;
+            // 验证下载的资源是否正确
             if (_verifyCallback != nullptr)
             {
                 ok = _verifyCallback(storagePath, asset);
