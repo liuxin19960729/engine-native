@@ -153,7 +153,7 @@ public:
          */
         uint16_t width = 4;
         /**
-         * The height of the texture
+         * The height of the texturesaveToFile
          */
         uint16_t height = 4;
         uint8_t bpp = 0;
