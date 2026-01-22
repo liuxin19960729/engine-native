@@ -376,7 +376,7 @@ bool AssetsManagerEx::loadRemoteManifest(Manifest *remoteManifest)
     }
     _remoteManifest = remoteManifest;
     _remoteManifest->retain();
-    // Compare manifest version and set state
+    // Compare manifest version and set state 本地版本 和 远程版本比较
     if (_localManifest->versionGreaterOrEquals(_remoteManifest, _versionCompareHandle))
     {
         _updateState = State::UP_TO_DATE;
@@ -385,6 +385,7 @@ bool AssetsManagerEx::loadRemoteManifest(Manifest *remoteManifest)
     }
     else
     {
+        // 新版本发现
         _updateState = State::NEED_UPDATE;
         dispatchUpdateEvent(EventAssetsManagerEx::EventCode::NEW_VERSION_FOUND);
     }
@@ -787,6 +788,11 @@ void AssetsManagerEx::parseManifest()
     }
 }
 
+/**
+ * 准备开始更新
+ *
+ *
+ */
 void AssetsManagerEx::prepareUpdate()
 {
     if (_updateState != State::NEED_UPDATE)
@@ -803,11 +809,15 @@ void AssetsManagerEx::prepareUpdate()
     _totalEnabled = false;
 
     // Temporary manifest exists, previously updating and equals to the remote version, resuming previous download
+    // 临时清单已存在，之前已更新且与远程版本相同，恢复之前的下载。
     if (_tempManifest && _tempManifest->isLoaded() && _tempManifest->isUpdating() && _tempManifest->versionEquals(_remoteManifest))
     {
         _tempManifest->saveToFile(_tempManifestPath);
         _tempManifest->genResumeAssetsList(&_downloadUnits);
         _totalWaitToDownload = _totalToDownload = (int)_downloadUnits.size();
+        /**
+         * 恢复下载的一个状态不是重头开始下载(可能重试下载失败的请情况)
+         */
         _downloadResumed = true;
 
         // Collect total size
@@ -823,6 +833,7 @@ void AssetsManagerEx::prepareUpdate()
     else
     {
         // Temporary manifest exists, but can't be parsed or version doesn't equals remote manifest (out of date)
+        // 临时清单存在，但无法解析或版本与远程清单不一致（已过期）
         if (_tempManifest)
         {
             // Remove all temp files
@@ -838,6 +849,7 @@ void AssetsManagerEx::prepareUpdate()
         _tempManifest = _remoteManifest;
 
         // Check difference between local manifest and remote manifest
+        // 本地和远程资源比较 获取diff
         std::unordered_map<std::string, Manifest::AssetDiff> diff_map = _localManifest->genDiff(_remoteManifest);
         if (diff_map.size() == 0)
         {
@@ -873,6 +885,7 @@ void AssetsManagerEx::prepareUpdate()
             _totalWaitToDownload = _totalToDownload = (int)_downloadUnits.size();
         }
     }
+    // 已经准备好随时可以开始更新
     _updateState = State::READY_TO_UPDATE;
 }
 
@@ -880,13 +893,16 @@ void AssetsManagerEx::startUpdate()
 {
     if (_updateState == State::NEED_UPDATE)
     {
+        // 1 准备更新
         prepareUpdate();
     }
+
     if (_updateState == State::READY_TO_UPDATE)
-    {
+    { // 开始更新
         _totalSize = 0;
         _updateState = State::UPDATING;
         std::string msg;
+        // 下载恢复
         if (_downloadResumed)
         {
             msg = StringUtils::format("Resuming from previous unfinished update, %d files remains to be finished.", _totalToDownload);
@@ -895,14 +911,16 @@ void AssetsManagerEx::startUpdate()
         {
             msg = StringUtils::format("Start to update %d files from remote package.", _totalToDownload);
         }
+        // 发送更新进度事件
         dispatchUpdateEvent(EventAssetsManagerEx::EventCode::UPDATE_PROGRESSION, "", msg);
         batchDownload();
     }
 }
 
+/**更新成功 */
 void AssetsManagerEx::updateSucceed()
 {
-    // Set temp manifest's updating
+    // Set temp manifest's updating 更新状态设置为false
     if (_tempManifest != nullptr)
     {
         _tempManifest->setUpdating(false);
@@ -912,6 +930,7 @@ void AssetsManagerEx::updateSucceed()
     // 1. rename temporary manifest to valid manifest
     if (_fileUtils->isFileExist(_tempManifestPath))
     {
+        // 将临时文件名字 修改非临时  note: 现在 仍然在零食文件夹目录里
         _fileUtils->renameFile(_tempStoragePath, TEMP_MANIFEST_FILENAME, MANIFEST_FILENAME);
     }
 
@@ -975,7 +994,7 @@ void AssetsManagerEx::updateSucceed()
     prepareLocalManifest();
     // 6. Set update state
     _updateState = State::UP_TO_DATE;
-    // 7. Notify finished event
+    // 7. Notify finished event 更新成功
     dispatchUpdateEvent(EventAssetsManagerEx::EventCode::UPDATE_FINISHED);
     // 8. Remove temp storage path
     _fileUtils->removeDirectory(_tempStoragePath);
@@ -1029,6 +1048,7 @@ void AssetsManagerEx::checkUpdate()
     }
 }
 
+/**开始更新 */
 void AssetsManagerEx::update()
 {
     if (_updateEntry != UpdateEntry::NONE)
@@ -1090,6 +1110,7 @@ void AssetsManagerEx::update()
         }
         else if (_updateEntry == UpdateEntry::DO_UPDATE)
         {
+            // 开始更新
             startUpdate();
         }
     }
@@ -1104,6 +1125,7 @@ void AssetsManagerEx::update()
     }
 }
 
+/**更新资源 */
 void AssetsManagerEx::updateAssets(const DownloadUnits &assets)
 {
     if (!_inited)
@@ -1115,6 +1137,7 @@ void AssetsManagerEx::updateAssets(const DownloadUnits &assets)
 
     if (_updateState != State::UPDATING && _localManifest->isLoaded() && _remoteManifest->isLoaded())
     {
+        /**开始更新  assets 资源*/
         _updateState = State::UPDATING;
         _downloadUnits.clear();
         _downloadedSize.clear();
@@ -1125,6 +1148,7 @@ void AssetsManagerEx::updateAssets(const DownloadUnits &assets)
         if (_totalToDownload > 0)
         {
             _downloadUnits = assets;
+            // 批量下载资源
             this->batchDownload();
         }
         else if (_totalToDownload == 0)
@@ -1347,7 +1371,7 @@ void AssetsManagerEx::batchDownload()
 
         _queue.push_back(iter.first);
     }
-    // All collected, enable total size
+    // All collected, enable total size 总大小已经确定  _totalEnabled=true
     if (_sizeCollected == _totalToDownload)
     {
         _totalEnabled = true;
@@ -1384,12 +1408,17 @@ void AssetsManagerEx::queueDowload()
     }
 }
 
+/**
+ * 下载完了
+ */
 void AssetsManagerEx::onDownloadUnitsFinished()
 {
     // Always save current download manifest information for resuming
+    // 始终保存当前的下载清单信息，以便能够继续进行下载。
     _tempManifest->saveToFile(_tempManifestPath);
 
     // Finished with error check
+    // 存在下载失败的情况
     if (_failedUnits.size() > 0)
     {
         _updateState = State::FAIL_TO_UPDATE;
