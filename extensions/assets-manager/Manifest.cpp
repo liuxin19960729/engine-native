@@ -262,6 +262,7 @@ bool Manifest::versionGreater(const Manifest *b, const std::function<int(const s
 std::unordered_map<std::string, Manifest::AssetDiff> Manifest::genDiff(const Manifest *b) const
 {
     std::unordered_map<std::string, AssetDiff> diff_map;
+    // Other manifest assets
     const std::unordered_map<std::string, Asset> &bAssets = b->getAssets();
 
     std::string key;
@@ -274,10 +275,16 @@ std::unordered_map<std::string, Manifest::AssetDiff> Manifest::genDiff(const Man
         key = it->first;
         valueA = it->second;
 
-        // Deleted
+        // Deleted 
+        /**
+         * map find 函数 返回迭代器
+         * note:如果没有找到 返回 end 迭代器
+         * 
+         */
         valueIt = bAssets.find(key);
         if (valueIt == bAssets.cend())
         {
+            // 在Other manifest没有找到 设置未 删除状态 
             AssetDiff diff;
             diff.asset = valueA;
             diff.type = DiffType::DELETED;
@@ -285,7 +292,7 @@ std::unordered_map<std::string, Manifest::AssetDiff> Manifest::genDiff(const Man
             continue;
         }
 
-        // Modified
+        // Modified 内容修改
         valueB = valueIt->second;
         if (valueA.md5 != valueB.md5)
         {
@@ -305,6 +312,7 @@ std::unordered_map<std::string, Manifest::AssetDiff> Manifest::genDiff(const Man
         valueIt = _assets.find(key);
         if (valueIt == _assets.cend())
         {
+            // Other manifest 多出来的文件 而自己没有 设置为 添加状态
             AssetDiff diff;
             diff.asset = valueB;
             diff.type = DiffType::ADDED;

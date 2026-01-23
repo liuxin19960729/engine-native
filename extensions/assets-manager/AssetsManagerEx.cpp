@@ -865,16 +865,19 @@ void AssetsManagerEx::prepareUpdate()
             for (auto it = diff_map.begin(); it != diff_map.end(); ++it)
             {
                 Manifest::AssetDiff diff = it->second;
+                // 改变的 和 新增的文件需要重新下载内容
                 if (diff.type != Manifest::DiffType::DELETED)
                 {
                     std::string path = diff.asset.path;
                     DownloadUnit unit;
-                    unit.customId = it->first;
+                    unit.cutsomId = it->first;
                     unit.srcUrl = packageUrl + path + "?md5=" + diff.asset.md5;
                     unit.storagePath = _tempStoragePath + path;
                     unit.size = diff.asset.size;
+                    // 下载单元
                     _downloadUnits.emplace(unit.customId, unit);
                     _tempManifest->setAssetDownloadState(it->first, Manifest::DownloadState::UNSTARTED);
+                    // 统计总共需要下载的字节数
                     _totalSize += unit.size;
                 }
             }
@@ -918,10 +921,14 @@ void AssetsManagerEx::startUpdate()
     }
 }
 
-/**更新成功 */
+/**
+ * 更新成功
+ *
+ */
 void AssetsManagerEx::updateSucceed()
 {
-    // Set temp manifest's updating 更新状态设置为false
+    // Set temp manifest's updating
+    // 将 temp manifest's  正在更新状态 设为 false
     if (_tempManifest != nullptr)
     {
         _tempManifest->setUpdating(false);
@@ -929,19 +936,23 @@ void AssetsManagerEx::updateSucceed()
 
     // Every thing is correctly downloaded, do the following
     // 1. rename temporary manifest to valid manifest
+
     if (_fileUtils->isFileExist(_tempManifestPath))
     {
-        // 将临时文件名字 修改非临时  note: 现在 仍然在零食文件夹目录里
+        // 将 project.manifest.temp  重命名为  project.manifest (note:目录在  _tempStoragePath===_storagePath+`_temp)
         _fileUtils->renameFile(_tempStoragePath, TEMP_MANIFEST_FILENAME, MANIFEST_FILENAME);
     }
 
     // 2. Get the delete files
+    //  获取  _localManifest 和  _remoteManifest  差异文件列表
     std::unordered_map<std::string, Manifest::AssetDiff> diff_map = _localManifest->genDiff(_remoteManifest);
 
     // 3. merge temporary storage path to storage path so that temporary version turns to cached version
+    // 将临时存储路径合并到存储路径，以便将临时版本转换为缓存版本
     if (_fileUtils->isDirectoryExist(_tempStoragePath))
     {
         // Merging all files in temp storage path to storage path
+        // 获取临时存储路径下的所有文件
         std::vector<std::string> files;
         _fileUtils->listFilesRecursively(_tempStoragePath, &files);
         int baseOffset = (int)_tempStoragePath.length();
@@ -949,6 +960,7 @@ void AssetsManagerEx::updateSucceed()
         for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); ++it)
         {
             relativePath.assign((*it).substr(baseOffset));
+            // dstPath=_storagePath+relativePath 目标路径
             dstPath.assign(_storagePath + relativePath);
             // Create directory
             if (relativePath.back() == '/')
@@ -958,6 +970,7 @@ void AssetsManagerEx::updateSucceed()
             // Copy file
             else
             {
+                // 将下载下来的文件 拷贝到  storagePath 目录下
                 if (_fileUtils->isFileExist(dstPath))
                 {
                     _fileUtils->removeFile(dstPath);
@@ -966,14 +979,17 @@ void AssetsManagerEx::updateSucceed()
             }
 
             // Remove from delete list for safe, although this is not the case in general.
+            // 从diff_map中移除已处理的文件(这个文件是更新下来以前不存在的文件)
             auto diff_itr = diff_map.find(relativePath);
             if (diff_itr != diff_map.end())
             {
+                // 删除 diff_map 中的该条目
                 diff_map.erase(diff_itr);
             }
         }
 
         // Preprocessing local files in previous version and creating download folders
+        // 删除diff_map 中的文件 note: 这里的文件 本地版本 和 远程版本 差异文件 并且 非远程多出来的问
         for (auto it = diff_map.begin(); it != diff_map.end(); ++it)
         {
             Manifest::AssetDiff diff = it->second;
@@ -986,7 +1002,7 @@ void AssetsManagerEx::updateSucceed()
         }
     }
 
-    // 4. swap the localManifest
+    // 4. swap the localManifest 将远程的清单文件存在在本地
     CC_SAFE_RELEASE(_localManifest);
     _localManifest = _remoteManifest;
     _localManifest->setManifestRoot(_storagePath);
@@ -1411,7 +1427,10 @@ void AssetsManagerEx::queueDowload()
 }
 
 /**
- * 下载完了
+ *
+ * 下载完成
+ * 1.没有下载失败的资源  更新成功
+ * 2.有下载失败的资源  发送更新失败事件
  */
 void AssetsManagerEx::onDownloadUnitsFinished()
 {
@@ -1432,6 +1451,10 @@ void AssetsManagerEx::onDownloadUnitsFinished()
     }
 }
 
+/**
+ * 取消更新
+ * 取消下载任务 清除正在下载的任务列表
+ */
 void AssetsManagerEx::cancelUpdate()
 {
     if (_canceled)
