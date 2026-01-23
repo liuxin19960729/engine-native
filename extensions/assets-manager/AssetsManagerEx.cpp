@@ -191,7 +191,9 @@ void AssetsManagerEx::prepareLocalManifest()
     _localManifest->prependSearchPaths();
 }
 
-/**加载localManifest地址*/
+/**
+ * 加载本地清单文件 初始化清单数据
+ */
 bool AssetsManagerEx::loadLocalManifest(Manifest *localManifest, const std::string &storagePath)
 {
     if (_updateState > State::UNINITED)
@@ -227,7 +229,7 @@ bool AssetsManagerEx::loadLocalManifest(Manifest *localManifest, const std::stri
         if (cachedManifest)
         {
             cachedManifest->parseFile(_cacheManifestPath);
-            if (!cachedManifest->isLoaded())
+            if (!cachedManifest->isLoaded())//缓存清单数据不正确 
             {
                 _fileUtils->removeFile(_cacheManifestPath);
                 CC_SAFE_RELEASE(cachedManifest);
@@ -252,6 +254,7 @@ bool AssetsManagerEx::loadLocalManifest(Manifest *localManifest, const std::stri
             _localManifest = cachedManifest;
         }
     }
+
     prepareLocalManifest();
 
     // Init temp manifest and remote manifest
@@ -359,6 +362,7 @@ bool AssetsManagerEx::loadLocalManifest(const std::string &manifestUrl)
     return true;
 }
 
+/**加载远程清单文件 */
 bool AssetsManagerEx::loadRemoteManifest(Manifest *remoteManifest)
 {
     if (!_inited || _updateState > State::UNCHECKED)
@@ -376,7 +380,7 @@ bool AssetsManagerEx::loadRemoteManifest(Manifest *remoteManifest)
     }
     _remoteManifest = remoteManifest;
     _remoteManifest->retain();
-    // Compare manifest version and set state 本地版本 和 远程版本比较
+    // Compare manifest version and set state  本地清单版本和远程版本比较
     if (_localManifest->versionGreaterOrEquals(_remoteManifest, _versionCompareHandle))
     {
         _updateState = State::UP_TO_DATE;
@@ -791,8 +795,7 @@ void AssetsManagerEx::parseManifest()
 
 /**
  * 准备开始更新
- *
- *
+ * State::NEED_UPDATE
  */
 void AssetsManagerEx::prepareUpdate()
 {
