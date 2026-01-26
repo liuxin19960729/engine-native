@@ -823,6 +823,7 @@ void HttpClient::networkThread()
         {
             std::lock_guard<std::mutex> lock(_requestQueueMutex);
             while (_requestQueue.empty()) {
+                // 请求队列为空，等待新请求到来
                 _sleepCondition.wait(_requestQueueMutex);
             }
             request = _requestQueue.at(0);
@@ -980,7 +981,7 @@ bool HttpClient::lazyInitThreadSemaphore()
     else
     {
         auto t = std::thread(CC_CALLBACK_0(HttpClient::networkThread, this));
-        t.detach();
+        t.detach();// 独立运行
         _isInited = true;
     }
 
@@ -999,7 +1000,8 @@ void HttpClient::send(HttpRequest* request)
     {
         return;
     }
-        
+    
+    // reference count  ++ 
     request->retain();
 
     _requestQueueMutex.lock();
