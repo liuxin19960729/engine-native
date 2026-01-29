@@ -120,6 +120,7 @@ bool JavaScriptArkTsBridge::CallInfo::execute(se::Value &rval)
     napi_status status;
     napi_value result;
     char* module_info = __getModuleInfo(module_name);
+    // 模块加载
     status = napi_load_module_with_info(env, _clsPath, module_info, &result);
     free(module_info);
     if (status != napi_ok) {
@@ -128,6 +129,7 @@ bool JavaScriptArkTsBridge::CallInfo::execute(se::Value &rval)
     }
     
     napi_value func;
+    // 获取模块导出函数
     status = napi_get_named_property(env, result, method, &func);
     if (status != napi_ok) {
         LOGW("callNativeMethod napi_get_named_property fail, status=%{public}d", status);
