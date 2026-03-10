@@ -104,6 +104,7 @@ namespace cocos2d { namespace network {
                                                "(II" JARG_STR "I)" JARG_DOWNLOADER))
             {
                 jobject jStr = methodInfo.env->NewStringUTF(hints.tempFileNameSuffix.c_str());
+                // 创建 Cocos2dxDownloader对象
                 jobject jObj = methodInfo.env->CallStaticObjectMethod(
                         methodInfo.classID,
                         methodInfo.methodID,
@@ -112,6 +113,7 @@ namespace cocos2d { namespace network {
                         jStr,
                         hints.countOfMaxProcessingTasks
                 );
+                // jObj添加上全局引用 防止被GC
                 _impl = methodInfo.env->NewGlobalRef(jObj);
                 DLLOG("android downloader: jObj: %p, _impl: %p", jObj, _impl);
                 //It's not thread-safe here, use thread-safe method instead
@@ -143,11 +145,13 @@ namespace cocos2d { namespace network {
                 //It's not thread-safe here, use thread-safe method instead
                 //sDownloaderMap.erase(_id);
                 _eraseDownloaderAndroid(_id);
+                //_impl 从全局引用中删除 
                 JniHelper::getEnv()->DeleteGlobalRef(_impl);
             }
             DLLOG("Destruct DownloaderAndroid: %p", this);
         }
 
+        // _taskMap key coTask->id  value coTask   向Cocos2dxDownloader.java  createTask 存入 coTask->id
         IDownloadTask *DownloaderAndroid::createCoTask(std::shared_ptr<const DownloadTask>& task)
         {
             DownloadTaskAndroid *coTask = new DownloadTaskAndroid;
@@ -248,13 +252,16 @@ namespace cocos2d { namespace network {
             }
             DownloadTaskAndroid *coTask = iter->second;
             std::string str = (errStr ? errStr : "");
+            // 从map 里面删除
             _taskMap.erase(iter);
+            // 触发 onTaskFinish
             onTaskFinish(*coTask->task,
                          errStr ? DownloadTask::ERROR_IMPL_INTERNAL : DownloadTask::ERROR_NO_ERROR,
                          errCode,
                          str,
                          data
             );
+            // coTask 重置
             coTask->task.reset();
         }
     }
@@ -279,6 +286,7 @@ JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnProgress)(JNIEnv *env, jclass claz
     downloader->_onProcess((int)taskId, (int64_t)dl, (int64_t)dlnow, (int64_t)dltotal);
 }
 
+//Cocos2dxDownloader.nativeOnFinish  
 JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnFinish)(JNIEnv *env, jclass clazz, jint id, jint taskId, jint errCode, jstring errStr, jbyteArray data)
 {
     if(getApplicationExited())
@@ -286,7 +294,7 @@ JNIEXPORT void JNICALL JNI_DOWNLOADER(nativeOnFinish)(JNIEnv *env, jclass clazz,
         return;
     }
     DLLOG("_nativeOnFinish(id: %d, taskId: %d)", id, taskId);
-    //It's not thread-safe here, use thread-safe method instead
+    //It's not thread-safe here, use thread-safe method instead 线程安全通过 id 查询download
     cocos2d::network::DownloaderAndroid *downloader = _findDownloaderAndroid(id);
     if (nullptr == downloader)
     {

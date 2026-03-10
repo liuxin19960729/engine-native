@@ -62,6 +62,7 @@ namespace cocos2d { namespace network {
         std::unique_ptr<IDownloadTask> _coTask;
     };
 
+    // 编译器生成默认初始化列表的构造函数
     class CC_DLL DownloaderHints
     {
     public:

@@ -66,13 +66,22 @@ namespace cocos2d { namespace network {
             45,
             ".tmp"
         };
+        // placement new‌  语法 在已经申请号的内存构建一个新对象
         new(this)Downloader(hints);
     }
 
     Downloader::Downloader(const DownloaderHints& hints)
     {
         DLLOG("Construct Downloader %p", this);
+        // DownloaderImpl 不同的平台不同实现
+        // apple DownloaderApple
+        // andriod DownloaderAndroid
+        // other  DownloaderCURL 
+
          _impl.reset(new DownloaderImpl(hints));
+
+
+         // Downloader onTaskProgress onTaskFinish 函数绑定
         _impl->onTaskProgress = [this](const DownloadTask& task,
                                        int64_t bytesReceived,
                                        int64_t totalBytesReceived,
@@ -124,6 +133,7 @@ namespace cocos2d { namespace network {
         DLLOG("Destruct Downloader %p", this);
     }
 
+    /**数据下载任务 */
     std::shared_ptr<const DownloadTask> Downloader::createDownloadDataTask(const std::string& srcUrl, const std::string& identifier/* = ""*/)
     {
         DownloadTask *task_ = new (std::nothrow) DownloadTask();
@@ -147,6 +157,7 @@ namespace cocos2d { namespace network {
         return task;
     }
 
+    /**文件下载任务 */
     std::shared_ptr<const DownloadTask> Downloader::createDownloadFileTask(const std::string& srcUrl,
                                                                            const std::string& storagePath,
                                                                            const std::map<std::string, std::string> &header,
@@ -169,7 +180,8 @@ namespace cocos2d { namespace network {
                 task.reset();
                 break;
             }
-            task_->_coTask.reset(_impl->createCoTask(task));
+           // task 和 task 具体具体实现双向绑定赋值
+           task_->_coTask.reset(_impl->createCoTask(task));
         } while (0);
 
         return task;

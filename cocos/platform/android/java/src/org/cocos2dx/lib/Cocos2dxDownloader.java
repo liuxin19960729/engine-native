@@ -91,7 +91,7 @@ public class Cocos2dxDownloader {
         Cocos2dxDownloader downloader = new Cocos2dxDownloader();
         downloader._id = id;
 
-        if (timeoutInSeconds > 0) {
+        if (timeoutInSeconds > 0) {// timeoutInSeconds 默认45s
             downloader._httpClient = new OkHttpClient().newBuilder()
                     .followRedirects(true)
                     .followSslRedirects(true)
@@ -105,11 +105,12 @@ public class Cocos2dxDownloader {
         }
 
 
-        downloader._tempFileNameSuffix = tempFileSuffix;
-        downloader._countOfMaxProcessingTasks = maxProcessingTasks;
+        downloader._tempFileNameSuffix = tempFileSuffix;// .tmp 
+        downloader._countOfMaxProcessingTasks = maxProcessingTasks;// 最多处理任务
         return downloader;
     }
 
+    // note: id_ 是 coTask->id  cpp _taskMap key coTask->id   value coTask 
     public static void createTask(final Cocos2dxDownloader downloader, int id_, String url_, String path_, String []header_) {
         final int id = id_;
         final String url = url_;
@@ -140,22 +141,25 @@ public class Cocos2dxDownloader {
                             break;
                         }
 
-                        // file task
+                        // file task 临时文件名
                         tempFile = new File(path + downloader._tempFileNameSuffix);
                         if (tempFile.isDirectory()) break;
-
+                        // 创建临时文件目录
                         File parent = tempFile.getParentFile();
                         if (!parent.isDirectory() && !parent.mkdirs()) break;
-
+                        // 最终文件名称
                         finalFile = new File(path);
-                        if (finalFile.isDirectory()) break;
+                        if (finalFile.isDirectory()) break;// 最终文件是一个目录 错误 直接退出
                         long fileLen = tempFile.length();
 
                         host = domain.startsWith("www.") ? domain.substring(4) : domain;
+                        // 临时文件已经写入了数据
                         if (fileLen > 0) {
+                            // 判断文件是否支持恢复下载
                             if (_resumingSupport.containsKey(host) && _resumingSupport.get(host)) {
                                 downloadStart = fileLen;
                             } else {
+                                // 不支持删除临时文件数据
                                 // Remove previous downloaded context
                                 try {
                                     PrintWriter writer = new PrintWriter(tempFile);
@@ -173,11 +177,14 @@ public class Cocos2dxDownloader {
                     for (int i = 0; i < header.length / 2; i++) {
                         builder.addHeader(header[i * 2], header[(i * 2) + 1]);
                     }
+
+                    // 断点续传
                     if (downloadStart > 0) {
                         builder.addHeader("RANGE", "bytes=" + downloadStart + "-");
                     }
 
                     final Request request = builder.build();
+                    // 下载任务构造
                     task = downloader._httpClient.newCall(request);
                     if (null == task) {
                         final String errStr = "Can't create DownloadTask for " + url;
@@ -188,11 +195,12 @@ public class Cocos2dxDownloader {
                             }
                         });
                     } else {
+                        //将任务存入 _taskMap
                         downloader._taskMap.put(id, task);
                     }                    
                     task.enqueue(new Callback() {
                         @Override
-                        public void onFailure(Call call, IOException e) {
+                        public void onFailure(Call call, IOException e) {//任务失败回调
                             downloader.onFinish(id, 0, e.toString(), null);
                         }
 
@@ -206,6 +214,7 @@ public class Cocos2dxDownloader {
 
                                 if(!(response.code() >= 200 && response.code() <= 206)) {
                                     // it is encourage to delete the tmp file when requested range not satisfiable.
+                                    // Range 指定的范围超出了 直接删除文件
                                     if (response.code() == 416) {
                                         File file = new File(path + downloader._tempFileNameSuffix);
                                         if (file.exists() && file.isFile()) {
@@ -230,18 +239,18 @@ public class Cocos2dxDownloader {
 
                                 if (path.length() > 0) {
                                     if (downloadStart > 0) {
-                                        fos = new FileOutputStream(tempFile, true);
+                                        fos = new FileOutputStream(tempFile, true);// append 模式
                                     } else {
                                         fos = new FileOutputStream(tempFile, false);
                                     }
-
+                                    // 写入数据到临时 文件 并且触发 onProgress
                                     int len;
                                     while ((len = is.read(buf)) != -1) {
                                         current += len;
                                         fos.write(buf, 0, len);
                                         downloader.onProgress(id, len, current, total);
                                     }
-                                    fos.flush();
+                                    fos.flush();// 将数据fush 磁盘
 
                                     String errStr = null;
                                     do {
@@ -255,9 +264,10 @@ public class Cocos2dxDownloader {
                                                 break;
                                             }
                                         }
+                                        // 将临时文件改名为正式文件
                                         tempFile.renameTo(finalFile);
                                     } while (false);
-
+                                    // 没有错误任务完了
                                     if (errStr == null) {
                                         downloader.onFinish(id, 0, null, null);
                                         downloader.runNextTaskIfExists();
@@ -351,7 +361,7 @@ public class Cocos2dxDownloader {
             }
         }
     }
-
+    // 取出一个任务执行下一个任务
     private void runNextTaskIfExists() {
         synchronized (_taskQueue) {
             while (_runningTaskCount < _countOfMaxProcessingTasks && 
