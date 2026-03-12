@@ -153,3 +153,42 @@ SharedPreferences Context.getSharedPreferences(String name, int mode)
   //  Service or BroadcastReceiver 
 
 ```
+## Gradle 构建预览
+```java
+//Task
+    // input:file directory or(int String ,自定义类型)的数据信息
+    // output:file directory
+
+
+// 逻辑卸载插件里面 
+// build 文件如何使用逻辑
+
+
+
+
+
+//Gradle build 运行时会发生什么
+//1.初始化 确定项目和子项目包含在build中.....
+    // 插件位置 和 需要构建的项目位置的确定
+//2.每个项目任务的注册 (note:执行期间配置代码不能访问执行期间生成的代码)
+//3.执行 
+
+```
+## Android build 结构
+```java
+settings.gradle
+//Gradle 初始化和项目配置的全局构建信息
+
+
+
+gradle/
+    wrapper.properties //指定 Gradle 发行版的下载位置
+
+
+
+app/
+     build.gradle// 声明如何构建此子项目。每个子项目都需要一个单独的 build 文件，并且应包含
+
+
+.......
+```
