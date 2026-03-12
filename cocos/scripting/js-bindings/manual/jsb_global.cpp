@@ -111,6 +111,7 @@ static void localDownloaderCreateTask(const std::string &url, std::function<void
     ss << "jsb_loadimage_" << (g_localDownloaderTaskId++);
     std::string key = ss.str();
     auto task = localDownloader()->createDownloadDataTask(url, key);
+    // 任务 identifier 和 回调函数绑定
     g_localDownloaderHandlers.emplace(std::make_pair(task->identifier, callback));
 }
 
@@ -840,6 +841,8 @@ bool jsb_global_load_image(const std::string& path, const se::Value& callbackVal
         auto pool = g_threadPool;
         if (!pool)
             return;
+        // const 成员函数 不能修改非静态成员变量 属性加上mutable 可以修改
+        // mutable只能卸载lambda 后面 note:lambda 默认捕获的值是const 不能修改  如果 加上mutalbe 可以修改捕获的值
         pool->pushTask([=](int tid) mutable {
             // NOTE: FileUtils::getInstance()->fullPathForFilename isn't a threadsafe method,
             // Image::initWithImageFile will call fullPathForFilename internally which may

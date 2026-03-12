@@ -549,6 +549,7 @@ Image::~Image()
     CC_SAFE_FREE(_data);
 }
 
+// 磁盘读取数据并初始化
 bool Image::initWithImageFile(const std::string& path)
 {
     bool ret = false;
@@ -566,6 +567,7 @@ bool Image::initWithImageFile(const std::string& path)
     return ret;
 }
 
+// 初始化图片数据
 bool Image::initWithImageData(const unsigned char * data, ssize_t dataLen)
 {
     bool ret = false;
@@ -591,9 +593,9 @@ bool Image::initWithImageData(const unsigned char * data, ssize_t dataLen)
             unpackedData = const_cast<unsigned char*>(data);
             unpackedLen = dataLen;
         }
-
+        // 判断文件格式
         _fileType = detectFormat(unpackedData, unpackedLen);
-
+        // 更具文件类型处理对应的数据
         switch (_fileType)
         {
         case Format::PNG:
