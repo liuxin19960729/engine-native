@@ -130,8 +130,26 @@ SharedPreferences Context.getSharedPreferences(String name, int mode)
 
 ``` 
 ### Permissions
+### Process Lifecycle
 ```java
-//为了
 
+//Andriod 系统会尽可量让某个应用进程尽可能长时间的存在
+//内存不足的时候 Andriod 会移除旧进程
+//进程的移除与用户和与其互动状态相关
+
+
+
+1.foreground Activity
+// 当前正在显示的Activity 在最上层 最重要的状态
+
+2.visiable Activity
+//可见活动 在 foreground dialog 后面的Activity
+//多窗口模式下Activity
+
+3.background Activity 
+
+
+4.empty process
+  //  Service or BroadcastReceiver 
 
 ```
