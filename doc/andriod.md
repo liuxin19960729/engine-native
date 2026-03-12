@@ -90,6 +90,48 @@ startActivityForResult(Intent,requestCode)
 // 2.user preferences
 
 
+// 
+SharedPreferences getPreferences(mode)
+    mode 
+        Context.MODE_PRIVATE
+        Context.MODE_WORLD_READABLE
+        Context.MODE_WORLD_WRITEABLE
+        Context.MODE_MULTI_PROCESS
+
+    // Context.MODE_PRIVATE 默认操作
+    // 可以组合传入
 
 
-```     
+//跨越多个应用共享偏好设置(活动 接收者 服务 提供者)
+// note: 跨越多个应用组件指的是 同一个App进程 共享
+SharedPreferences Context.getSharedPreferences(String name, int mode) 
+
+    mode 
+        Context.MODE_PRIVATE
+        Context.MODE_WORLD_READABLE
+        Context.MODE_WORLD_WRITEABLE
+        Context.MODE_MULTI_PROCESS
+    // 可以组合传入
+
+
+
+// 例子
+
+// 读取数据
+ mPrefs = getSharedPreferences(getLocalClassName(), MODE_PRIVATE);
+         mCurViewMode = mPrefs.getInt("view_mode", DAY_VIEW_MODE);
+
+
+// 存储数据
+
+ SharedPreferences.Editor ed = mPrefs.edit();
+         ed.putInt("view_mode", mCurViewMode);
+         ed.commit();
+
+``` 
+### Permissions
+```java
+//为了
+
+
+```
