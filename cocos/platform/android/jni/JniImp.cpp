@@ -469,6 +469,8 @@ extern "C"
     JNIEXPORT void JNICALL JNI_HELPER(nativeSetContext)(JNIEnv*  env, jobject thiz, jobject context, jobject assetManager)
     {
         JniHelper::setClassLoaderFrom(context);
+        //Given a Dalvik AssetManager object
+        
         FileUtilsAndroid::setassetmanager(AAssetManager_fromJava(env, assetManager));
     }
 

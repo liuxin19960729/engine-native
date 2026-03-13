@@ -414,6 +414,7 @@ WsThreadHelper::~WsThreadHelper()
     delete _subThreadWsMessageQueue;
 }
 
+//创建WebSocket 线程
 bool WsThreadHelper::createWebSocketThread()
 {
     // Creates websocket thread
@@ -494,9 +495,11 @@ void WsThreadHelper::onSubThreadEnded()
     }
 }
 
+// 线程启动线程执行函数
 void WsThreadHelper::wsThreadEntryFunc()
 {
     LOGD("WebSocket thread start, helper instance: %p\n", this);
+    //数据初始化
     onSubThreadStarted();
 
     while (!_needQuit)
@@ -509,17 +512,19 @@ void WsThreadHelper::wsThreadEntryFunc()
     LOGD("WebSocket thread exit, helper instance: %p\n", this);
 }
 
+// 注册回调函数 在Cocos线程执行
 void WsThreadHelper::sendMessageToCocosThread(const std::function<void()>& cb)
 {
     cocos2d::Application::getInstance()->getScheduler()->performFunctionInCocosThread(cb);
 }
 
+// 将消息放入Queue
 void WsThreadHelper::sendMessageToWebSocketThread(WsMessage *msg)
 {
     std::lock_guard<std::mutex> lk(_subThreadWsMessageQueueMutex);
     _subThreadWsMessageQueue->push_back(msg);
 }
-
+// 获取当前还有好多数据在队列里面 没有返送
 size_t WsThreadHelper::countBufferdBytes(const WebSocketImpl *ws)
 {
     std::lock_guard<std::mutex> lk(_subThreadWsMessageQueueMutex);
@@ -744,7 +749,7 @@ bool WebSocketImpl::init(const cocos2d::network::WebSocket::Delegate& delegate,
 
     return true;
 }
-
+// 获取还有好多数据没有返送
 size_t WebSocketImpl::getBufferedAmount() const
 {
     return __wsHelper->countBufferdBytes(this);
@@ -989,6 +994,7 @@ struct lws_vhost* WebSocketImpl::createVhost(struct lws_protocols* protocols, in
     return vhost;
 }
 
+// 客户端请求连接
 void WebSocketImpl::onClientOpenConnectionRequest()
 {
     if (nullptr != __wsContext)
@@ -1009,14 +1015,14 @@ void WebSocketImpl::onClientOpenConnectionRequest()
             },
             { nullptr, nullptr, nullptr /* terminator */ }
         };
-
+        // _readyState 正在连接
         _readyStateMutex.lock();
         _readyState = cocos2d::network::WebSocket::State::CONNECTING;
         _readyStateMutex.unlock();
 
         cocos2d::network::Uri uri = cocos2d::network::Uri::parse(_url);
         LOGD("scheme: %s, host: %s, port: %d, path: %s\n", uri.getScheme().c_str(), uri.getHostName().c_str(), static_cast<int>(uri.getPort()), uri.getPathEtc().c_str());
-
+        // 是否是wss
         int sslConnection = 0;
         if (uri.isSecure())
             sslConnection = LCCSCF_USE_SSL;
@@ -1031,6 +1037,7 @@ void WebSocketImpl::onClientOpenConnectionRequest()
             vhost = createVhost(__defaultProtocols, sslConnection);
         }
 
+        // 端口获取
         int port = static_cast<int>(uri.getPort());
         if (port == 0)
             port = uri.isSecure() ? 443 : 80;
@@ -1055,7 +1062,7 @@ void WebSocketImpl::onClientOpenConnectionRequest()
         connectInfo.userdata = this;
         connectInfo.client_exts = exts;
         connectInfo.vhost = vhost;
-
+        // 向服务器请求连接
         _wsInstance = lws_client_connect_via_info(&connectInfo);
 
         if (nullptr == _wsInstance)
@@ -1238,6 +1245,8 @@ int WebSocketImpl::onClientWritable()
     return 0;
 }
 
+
+//WebSocket 数据接收
 int WebSocketImpl::onClientReceivedData(void* in, ssize_t len)
 {
     // In websocket thread
@@ -1248,7 +1257,7 @@ int WebSocketImpl::onClientReceivedData(void* in, ssize_t len)
         LOGD("Receiving data:index:%d, len=%d\n", packageIndex, (int)len);
 
         unsigned char* inData = (unsigned char*)in;
-        _receivedData.insert(_receivedData.end(), inData, inData + len);
+        _receivedData.insert(_receivedData.end(), inData, inData + len);//插入数据到Vector
     }
     else
     {
@@ -1259,7 +1268,7 @@ int WebSocketImpl::onClientReceivedData(void* in, ssize_t len)
     size_t remainingSize = lws_remaining_packet_payload(_wsInstance);
     int isFinalFragment = lws_is_final_fragment(_wsInstance);
 //    LOGD("remainingSize: %d, isFinalFragment: %d\n", (int)remainingSize, isFinalFragment);
-
+    // 缓存区里面没有数据 并且是最后一个fragment
     if (remainingSize == 0 && isFinalFragment)
     {
         std::vector<char>* frameData = new (std::nothrow) std::vector<char>(std::move(_receivedData));
@@ -1301,7 +1310,7 @@ int WebSocketImpl::onClientReceivedData(void* in, ssize_t len)
 
     return 0;
 }
-
+// websocket 握手连接成功
 int WebSocketImpl::onConnectionOpened()
 {
     const lws_protocols* lwsSelectedProtocol = lws_get_protocol(_wsInstance);
@@ -1311,7 +1320,7 @@ int WebSocketImpl::onConnectionOpened()
      * start the ball rolling,
      * LWS_CALLBACK_CLIENT_WRITEABLE will come next service
      */
-    lws_callback_on_writable(_wsInstance);
+    lws_callback_on_writable(_wsInstance);// 注册可以写的回调事件
 
     {
         std::lock_guard<std::mutex> lk(_readyStateMutex);
@@ -1426,6 +1435,8 @@ int WebSocketImpl::onConnectionClosed()
     return 0;
 }
 
+
+// 接收libwebsocket 回调调用
 int WebSocketImpl::onSocketCallback(struct lws *wsi, enum lws_callback_reasons reason, void* in, ssize_t len)
 {
     //LOGD("socket callback for %d reason\n", reason);
@@ -1437,7 +1448,7 @@ int WebSocketImpl::onSocketCallback(struct lws *wsi, enum lws_callback_reasons r
             ret = onConnectionOpened();
             break;
 
-        case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
+        case LWS_CALLBACK_CLIENT_CONNECTION_ERROR://连接错误
             ret = onConnectionError();
             break;
 

@@ -72,6 +72,7 @@ JSB_WebSocketDelegate::~JSB_WebSocketDelegate()
     CCLOGINFO("In the destructor of JSB_WebSocketDelegate(%p)", this);
 }
 
+// note:在Cocos 线程执行 触发WebSocket onopen 的函数
 void JSB_WebSocketDelegate::onOpen(WebSocket* ws)
 {
     se::ScriptEngine::getInstance()->clearException();
@@ -90,6 +91,7 @@ void JSB_WebSocketDelegate::onOpen(WebSocket* ws)
     se::HandleObject jsObj(se::Object::createPlainObject());
     jsObj->setProperty("type", se::Value("open"));
     se::Value target;
+    // native ptr to se::Value
     native_ptr_to_seval<WebSocket>(ws, &target);
     jsObj->setProperty("target", target);
 
@@ -107,6 +109,7 @@ void JSB_WebSocketDelegate::onOpen(WebSocket* ws)
     }
 }
 
+//Cocos线程执行 数据接收 触发WebSocket onmessage 函数调用
 void JSB_WebSocketDelegate::onMessage(WebSocket* ws, const WebSocket::Data& data)
 {
     se::ScriptEngine::getInstance()->clearException();
@@ -279,20 +282,26 @@ static bool WebSocket_finalize(se::State& s)
         cobj->release();
     return true;
 }
+
+// 如果JS对象控制CPP 生命周期 JS 对象释放触发finalize 所以CPP对象在finzlize里面释放对象
 SE_BIND_FINALIZE_FUNC(WebSocket_finalize)
 
 static bool WebSocket_constructor(se::State& s)
-{
+{   
+    // 构造函数参数获取
     const auto& args = s.args();
     int argc = (int)args.size();
 
     if (argc == 1 || argc == 2 || argc == 3)
     {
         std::string url;
-
+        //seval 表示se::Value 
+        //se::Value to std::string
+        //url 连接地址的获取
         bool ok = seval_to_std_string(args[0], &url);
         SE_PRECONDITION2(ok, false, "Error processing url argument");
 
+        //获取的是JS 对象
         se::Object* obj = s.thisObject();
         WebSocket* cobj = nullptr;
         if (argc >= 2)
@@ -303,12 +312,14 @@ static bool WebSocket_constructor(se::State& s)
             if (args[1].isString())
             {
                 std::string protocol;
+                 // protocols string 参数
                 ok = seval_to_std_string(args[1], &protocol);
                 SE_PRECONDITION2(ok, false, "Error processing protocol string");
                 protocols.push_back(protocol);
             }
             else if (args[1].isObject() && args[1].toObject()->isArray())
             {
+                // protocols Array<string>
                 se::Object* protocolArr = args[1].toObject();
                 uint32_t len = 0;
                 ok = protocolArr->getArrayLength(&len);
@@ -329,6 +340,7 @@ static bool WebSocket_constructor(se::State& s)
 
             if (argc > 2)
             {
+                // 证书路径
                 ok = seval_to_std_string(args[2], &caFilePath);
                 SE_PRECONDITION2(ok, false, "Error processing caFilePath");
             }
@@ -386,7 +398,9 @@ static bool WebSocket_constructor(se::State& s)
     SE_REPORT_ERROR("wrong number of arguments: %d, was expecting 1<= and <=3", argc);
     return false;
 }
+// 包装一个JS构造函数
 SE_BIND_CTOR(WebSocket_constructor, __jsb_WebSocket_class, WebSocket_finalize)
+
 
 static bool WebSocket_send(se::State& s)
 {
@@ -538,6 +552,7 @@ static bool WebSocket_getReadyState(se::State& s)
 }
 SE_BIND_PROP_GET(WebSocket_getReadyState)
 
+//获取当前还有好多数据存在Buffer 没有发送
 static bool WebSocket_getBufferedAmount(se::State& s)
 {
     const auto& args = s.args();
