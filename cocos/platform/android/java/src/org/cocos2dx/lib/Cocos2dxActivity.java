@@ -479,9 +479,11 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
     protected void onLoadNativeLibraries() {
         try {
+            // AndriodMinifest.xml <application> <meta-data> 
             ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
             String libName = bundle.getString("android.app.lib_name");
+            // 加载动态链接库
             System.loadLibrary(libName);
         } catch (Exception e) {
             e.printStackTrace();

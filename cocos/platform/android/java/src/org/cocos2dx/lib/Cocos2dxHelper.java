@@ -238,6 +238,15 @@ public class Cocos2dxHelper {
     
     // This function returns the absolute path to the OBB if it exists,
     // else it returns the absolute path to the APK.
+    /**
+     *OBB 谷歌官方定义的扩展文件 本质是 加密/未加密 zip包
+     *主扩展包      main.<versionCode>.<package-name>.obb
+     *补丁扩展包    path.<versionCode>.<package-name>.obb
+     * 
+     * 存储位置 /Andriod/obb/<package-name>/  or  外部存储
+     * 
+     */
+
     public static String getAssetsPath()
     {
         if (Cocos2dxHelper.sAssetsPath == "") {
