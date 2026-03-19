@@ -127,6 +127,7 @@ static std::string removeFileExt(const std::string& filePath)
     return filePath;
 }
 
+// 设置 函数  onGetDataFromFile和onGetStringFromFile  读取 解密 解压
 void jsb_init_file_operation_delegate()
 {
     static se::ScriptEngine::FileOperationDelegate delegate;
@@ -148,7 +149,7 @@ void jsb_init_file_operation_delegate()
                     SE_REPORT_ERROR("Can't decrypt code for %s", byteCodePath.c_str());
                     return;
                 }
-
+                // zip 解压
                 if (ZipUtils::isGZipBuffer(data,dataLen)) {
                     uint8_t* unpackedData;
                     ssize_t unpackedLen = ZipUtils::inflateMemory(data, dataLen,&unpackedData);
@@ -174,6 +175,7 @@ void jsb_init_file_operation_delegate()
             readCallback(fileData.getBytes(), fileData.getSize());
         };
 
+        // 数据读取 解密 解压
         delegate.onGetStringFromFile = [](const std::string& path) -> std::string{
             assert(!path.empty());
 

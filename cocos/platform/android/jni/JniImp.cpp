@@ -179,7 +179,8 @@ extern "C"
     {
         g_width = w;
         g_height = h;
-        
+        //Application 对象创建
+        //设置View大小
         g_app = cocos_android_app_init(env, w, h);
 
         g_isGameFinished = false;
@@ -190,12 +191,12 @@ extern "C"
 
         if (!defaultResourcePath.empty())
             FileUtils::getInstance()->setDefaultResourceRootPath(defaultResourcePath);
-
+        // 脚本引擎初始化    
         se::ScriptEngine* se = se::ScriptEngine::getInstance();
         se->addRegisterCallback(setCanvasCallback);
 
         EventDispatcher::init();
-
+        // Application::start call
         g_app->start();
         g_isStarted = true;
     }

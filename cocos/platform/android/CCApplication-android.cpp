@@ -53,6 +53,7 @@ PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArraysOESEXT = 0;
 
 NS_CC_BEGIN
 
+// 更新 ViewSize 并且触发 onResize(事件函数调用)
 void Application::updateViewSize(int width, int height)
 {
     _viewSize.x = width;
@@ -91,7 +92,7 @@ Application::Application(const std::string& name, int width, int height)
 {
     Application::_instance = this;
     Configuration::getInstance();
-
+    // 创建调度器独享
     _scheduler = std::make_shared<Scheduler>();
 
     PFNGLGENVERTEXARRAYSOESPROC glGenVertexArraysOESEXT = (PFNGLGENVERTEXARRAYSOESPROC)eglGetProcAddress("glGenVertexArraysOES");

@@ -46,8 +46,9 @@ AppDelegate::~AppDelegate()
 bool AppDelegate::applicationDidFinishLaunching()
 {
     se::ScriptEngine* se = se::ScriptEngine::getInstance();
-
+    // xxteaKey 设置
     jsb_set_xxtea_key("");
+    //设置脚本数据读取 解密 解压等操作
     jsb_init_file_operation_delegate();
 
 #if defined(COCOS2D_DEBUG) && (COCOS2D_DEBUG > 0)
