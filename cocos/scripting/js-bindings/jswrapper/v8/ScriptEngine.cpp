@@ -496,7 +496,9 @@ namespace se {
         _beforeInitHookArray.clear();
         v8::Isolate::CreateParams create_params;
         create_params.array_buffer_allocator = v8::ArrayBuffer::Allocator::NewDefaultAllocator();
+        // Isolate 是 V8 的核心沙箱，每个 Isolate 独立运行 JS
         _isolate = v8::Isolate::New(create_params);
+        // 管理V8的生命周期
         v8::HandleScope hs(_isolate);
         _isolate->Enter();
 
@@ -506,7 +508,7 @@ namespace se {
         _isolate->SetOOMErrorHandler(onOOMErrorCallback);
         _isolate->AddMessageListener(onMessageCallback);
         _isolate->SetPromiseRejectCallback(onPromiseRejectCallback);
-
+        // Context::New 创建上一下文
         _context.Reset(_isolate, v8::Context::New(_isolate));
         _context.Get(_isolate)->Enter();
 
@@ -516,7 +518,7 @@ namespace se {
         Object::setup();
         Class::setIsolate(_isolate);
         Object::setIsolate(_isolate);
-
+        // 全局对象创建
         _globalObj = Object::_createJSObject(nullptr, _context.Get(_isolate)->Global());
         _globalObj->root();
         _globalObj->setProperty("window", Value(_globalObj));

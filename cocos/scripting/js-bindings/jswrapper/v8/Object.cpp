@@ -61,8 +61,7 @@ namespace se {
         if(__objectMap){
             __objectMap->erase(this);
         }
-    }
-
+    }    
     /*static*/
     void Object::nativeObjectFinalizeHook(void* nativeObj)
     {

@@ -80,13 +80,14 @@ namespace se {
     {
         _cls = cls;
         _heap = obj;
-
+        // 避免重复创建JS对象
         assert(__objectMap.find(this) == __objectMap.end());
         __objectMap.emplace(this, nullptr);
 
         return true;
     }
 
+    /**创建JS对象 */
     Object* Object::_createJSObject(Class* cls, JSObject* obj)
     {
         Object* ret = new Object();
