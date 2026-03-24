@@ -60,6 +60,7 @@ jclass _getClassID(const char *className) {
     return _clazz;
 }
 
+// 线程退出的时候执行该函数
 void _detachCurrentThread(void* a) {
     cocos2d::JniHelper::getJavaVM()->DetachCurrentThread();
 }
@@ -80,10 +81,10 @@ namespace cocos2d {
     }
 
     void JniHelper::setJavaVM(JavaVM *javaVM) {
+        // 获取call pthread_self 的线程ID
         pthread_t thisthread = pthread_self();
         LOGD("JniHelper::setJavaVM(%p), pthread_self() = %ld", javaVM, thisthread);
         _psJavaVM = javaVM;
-        // Thread Local
         pthread_key_create(&g_key, _detachCurrentThread);
     }
 
@@ -94,7 +95,7 @@ namespace cocos2d {
         
         switch (ret) {
         case JNI_OK :
-            // Success!
+            // Success! 正确获取环境上布局 当前线程和环境变量绑定
             pthread_setspecific(g_key, _env);
             return _env;
 
@@ -121,7 +122,9 @@ namespace cocos2d {
     }
 
     JNIEnv* JniHelper::getEnv() {
+        // 获取当前线程的 g_key 映射的数据
         JNIEnv *_env = (JNIEnv *)pthread_getspecific(g_key);
+        // 不存在 获取 并和线程绑定 缓存
         if (_env == nullptr)
             _env = JniHelper::cacheEnv(_psJavaVM);
         return _env;

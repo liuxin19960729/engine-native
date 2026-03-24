@@ -241,10 +241,12 @@ bool JavaScriptJavaBridge::CallInfo::execute()
             SE_LOGD("Return type '%d' is not supported", static_cast<int>(m_returnType));
             return false;
     }
-
+    // 执行Java 函数是否异常 
     if (m_env->ExceptionCheck() == JNI_TRUE)
     {
+        //打印一个异常和栈的回溯，指向系统错误报告通道，如 stderr。调用该函数的副作用会清除待处理的异常。这是一个方便的调试程序。
         m_env->ExceptionDescribe();
+        // 清除当前抛出的任何异常。如果当前没有抛出异常，这个例程就没有效果
         m_env->ExceptionClear();
         m_error = JSJ_ERR_EXCEPTION_OCCURRED;
         return false;
@@ -511,6 +513,7 @@ static bool JavaScriptJavaBridge_callStaticMethod(se::State& s)
                 SE_REPORT_ERROR("call result code: %d", call.getErrorCode());
                 return false;
             }
+            // 返回值设置
             JavaScriptJavaBridge::convertReturnValue(call.getReturnValue(), call.getReturnValueType(), &s.rval());
             return true;
         }
@@ -614,11 +617,12 @@ SE_BIND_FUNC(JavaScriptJavaBridge_callStaticMethod)
 
 bool register_javascript_java_bridge(se::Object* obj)
 {
+    // 创建一个名字为 JavascriptJavaBridge
     se::Class* cls = se::Class::create("JavascriptJavaBridge", obj, nullptr, _SE(JavaScriptJavaBridge_constructor));
     cls->defineFinalizeFunction(_SE(JavaScriptJavaBridge_finalize));
-
+    // 定义成员函数 callStaticMethod
     cls->defineFunction("callStaticMethod", _SE(JavaScriptJavaBridge_callStaticMethod));
-
+    // 注册到虚拟机  note:注册成功  就可以使用 JavascriptJavaBridge
     cls->install();
     __jsb_JavaScriptJavaBridge_class = cls;
 
