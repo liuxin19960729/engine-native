@@ -79,5 +79,89 @@ JNI 允许程序员在本地方法中任意时刻手动删除本地引用。为�
 所有传递给本地方法的Java对象都会注册的注册表(防止这些对象垃圾回收)
 本地方法执行完返回后注册表会删除这些Java独享(允许这些对象被垃圾回收)
 
+```
+### 访问Java对象
+#### 访问原始数组
+```java
+JNI 提供了一组Java数组和本地缓冲区之间复制的函数(这些函数不同虚拟机有不同的实现)
+    // 实现方式之一
+    GC支持 pinning  native 方法要求的布局和目前虚拟机数组布局一直 则不需要复制数组
+
+    or 数组被移动到不可移动的内存块(例如: C heap) 返回指向副本的指针、
+
+JNI 还提供了不在访问数组的函数(当前不在使用数组的时候调用)
+
+```
+#### 访问字段和方法
+```java
+
+
+jmethodID methodID = env->GetMethodID(classID, methodName, paramCode);
+
+
+// 本地方法可以反复使用 methodID 无需重复花费methodID 的代价
+jdouble result = env->CallDoubleMethod(obj, mid, 10, str);
+
+note:字段和id并不能阻止虚拟机类被卸载掉
+
+
+```
+#### 报告程序错误
+```
+JNI 不检查程序的错误
+原因：
+    1.检查错误条件会减低正确的本地方法性能
+    2.在很多情况下，运行是类型信息不能够检查
+
+```
+#### Java Exceptions
+```java
+
+调用 Java 方法的 JNI 函数返回 Java 方法的结果。程序员必须调用 ExceptionOccurred（） 来检查在 Java 方法执行过程中可能出现的异常。
+
+
+ JNI 数组访问函数不会返回错误代码，但可能会抛出 ArrayIndexOutOfBoundsException 或 ArrayStoreException。
+
+```
+#### 异步 Exceptions
+```java
+
+
+ExceptionOccurred（） 来显式检查同步和异步异常
+
+
+//native 函数 清楚异常执行自己的异常代码处理
+env->ExceptionClear();
+
+
+note:
+    异常出现后 native 必须 ExceptionClea() 清除异常才能执行其他的JNI调用
+
+
+```
+## JNI 类型和数据结构
+### 原始类型
+```java
+基础类型  -> j+基础类型
+
+例如:
+boolean->jboolean
+```
+### 引用类型
+```
+jobject
+jstring
+
+// 数组
+jobjectArray
+j+基础类型+Array
+
+
+//java.lang.Throwable objects
+jthrowable
+
+```
+### Filed 和Method ID
+```java
 
 ```
