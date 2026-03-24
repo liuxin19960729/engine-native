@@ -208,7 +208,7 @@ namespace se {
 
         /**
          *  @brief Gets the delegate for file operation.
-         *  @return The delegate for file operation
+        *  @return The delegate for file operation
          */
         const FileOperationDelegate& getFileOperationDelegate() const;
 

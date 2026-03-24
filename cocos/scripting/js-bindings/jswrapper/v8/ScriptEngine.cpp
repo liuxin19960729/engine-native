@@ -855,11 +855,12 @@ namespace se {
     {
         assert(!path.empty());
         assert(_fileOperationDelegate.isValid());
-
+        // 获取脚本字符串
         std::string scriptBuffer = _fileOperationDelegate.onGetStringFromFile(path);
 
         if (!scriptBuffer.empty())
         {
+            // 自行脚本
             return evalString(scriptBuffer.c_str(), scriptBuffer.length(), ret, path.c_str());
         }
 

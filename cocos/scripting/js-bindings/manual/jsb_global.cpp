@@ -293,7 +293,7 @@ bool jsb_set_extend_property(const char* ns, const char* clsName)
 namespace {
 
     std::unordered_map<std::string, se::Value> __moduleCache;
-
+    // js  windown.require 函数实现
     static bool require(se::State& s)
     {
         const auto& args = s.args();
