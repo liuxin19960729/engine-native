@@ -200,7 +200,7 @@ extern "C"
         g_app->start();
         g_isStarted = true;
     }
-
+    //被Andriod Render.onDrawFrame call
 	JNIEXPORT void JNICALL JNI_RENDER(nativeRender)(JNIEnv* env)
 	{
         if (g_isGameFinished)
@@ -253,6 +253,7 @@ extern "C"
             g_app->getRenderTexture()->prepare();
 
         g_app->getScheduler()->update(dt);
+        //js scripts  window.gameTick
         EventDispatcher::dispatchTickEvent(dt);
        
         if (downsampleEnabled)

@@ -99,6 +99,8 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
 
     public void setCocos2dxRenderer(final Cocos2dxRenderer renderer) {
         this.mCocos2dxRenderer = renderer;
+        // 注册渲染器
+        // 渲染器会在独立线程执行和Andriod 界面线程不是用一个线程
         this.setRenderer(this.mCocos2dxRenderer);
     }
 

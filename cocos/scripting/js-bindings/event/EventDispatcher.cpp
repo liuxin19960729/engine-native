@@ -270,7 +270,8 @@ void EventDispatcher::dispatchKeyboardEvent(const struct KeyboardEvent& keyboard
         callbackVal.toObject()->call(args, nullptr);
     }
 }
-    
+
+// js script gameTick run 
 void EventDispatcher::dispatchTickEvent(float dt)
 {
     if (!se::ScriptEngine::getInstance()->isValid())

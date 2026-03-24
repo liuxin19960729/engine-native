@@ -101,6 +101,9 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(final GL10 GL10, final EGLConfig EGLConfig) {
+         // onSurfaceCreated 表面被创建or重新创建的时候调用
+         // 此方法会在渲染开始时以及每次 EGL 上下文丢失时调用
+         // note: Andriod 冲睡眠状态唤醒的时候EGL上下文通常会丢失   
         mNativeInitCompleted = false;
         Cocos2dxRenderer.nativeInit(this.mScreenWidth, this.mScreenHeight, mDefaultResourcePath);
         mOldNanoTime = System.nanoTime();
@@ -115,14 +118,17 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
             });
         }
     }
-
+    
     @Override
     public void onSurfaceChanged(final GL10 GL10, final int width, final int height) {
+        // 表面发生大小变化的时候调用
         Cocos2dxRenderer.nativeOnSurfaceChanged(width, height);
     }
 
     @Override
     public void onDrawFrame(final GL10 gl) {
+        // 绘制当前帧被调用
+        // 此方法负责当前帧绘制
         if (mNeedToPause)
             return;
 
