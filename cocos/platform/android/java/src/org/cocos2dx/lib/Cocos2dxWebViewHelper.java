@@ -185,6 +185,7 @@ public class Cocos2dxWebViewHelper {
     }
 
     public static void loadUrl(final int index, final String url) {
+        //加载URL
         sCocos2dxActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {

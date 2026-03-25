@@ -130,6 +130,7 @@ namespace {
         cocos2d::JniMethodInfo t;
         if (cocos2d::JniHelper::getStaticMethodInfo(t, className.c_str(), "createWebView", "()I")) {
             // LOGD("error: %s,%d",__func__,__LINE__);
+            // webView 标记
             jint viewTag = t.env->CallStaticIntMethod(t.classID, t.methodID);
             t.env->DeleteLocalRef(t.classID);
             return viewTag;
@@ -182,6 +183,7 @@ namespace cocos2d {
     }
 
     void WebViewImpl::loadURL(const std::string &url) {
+        //加载URL
         JniHelper::callStaticVoidMethod(className, "loadUrl", _viewTag, url);
     }
 

@@ -38,7 +38,8 @@ android {
             }
         }
     }
-
+    //资源目录
+    //资源目录指定多个资源目录 构建工具会将它们合并在一起
     sourceSets.main {
         java.srcDirs "../src", "src"
         res.srcDirs "../res", 'res'
